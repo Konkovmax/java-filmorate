@@ -3,7 +3,7 @@ package ru.yandex.practicum.filmorate;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.filmorate.controllers.UserController;
-import ru.yandex.practicum.filmorate.exceptions.ValidationException;
+import ru.yandex.practicum.filmorate.exceptions.BadRequestException;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.time.LocalDate;
@@ -16,8 +16,8 @@ public class UserControllerTest {
     public void PostUserWithEmptyLogin() {
         User user = new User(1, "Nick Name", "", LocalDate.of(1946, 8, 20), "mail@mail.ru");
         UserController userController = new UserController();
-        ValidationException ex = assertThrows(
-                ValidationException.class,
+        BadRequestException ex = assertThrows(
+                BadRequestException.class,
                 () -> {
                     userController.create(user);
                 });
@@ -28,8 +28,8 @@ public class UserControllerTest {
     public void PostUserWithLoginWithSpaces() {
         User user = new User(1, "Nick Name", " ", LocalDate.of(1946, 8, 20), "mail@mail.ru");
         UserController userController = new UserController();
-        ValidationException ex = assertThrows(
-                ValidationException.class,
+        BadRequestException ex = assertThrows(
+                BadRequestException.class,
                 () -> {
                     userController.create(user);
                 });
@@ -40,8 +40,8 @@ public class UserControllerTest {
     public void PostUserWithFutureBirthday() {
         User user = new User(1, "Nick Name", "dolore", LocalDate.of(2046, 8, 20), "mail@mail.ru");
         UserController userController = new UserController();
-        ValidationException ex = assertThrows(
-                ValidationException.class,
+        BadRequestException ex = assertThrows(
+                BadRequestException.class,
                 () -> {
                     userController.create(user);
                 });
@@ -52,8 +52,8 @@ public class UserControllerTest {
     public void PostUserWithFailEmail() {
         User user = new User(1, "Nick Name", "dolore", LocalDate.of(1946, 8, 20), "mail.ru");
         UserController userController = new UserController();
-        ValidationException ex = assertThrows(
-                ValidationException.class,
+        BadRequestException ex = assertThrows(
+                BadRequestException.class,
                 () -> {
                     userController.create(user);
                 });

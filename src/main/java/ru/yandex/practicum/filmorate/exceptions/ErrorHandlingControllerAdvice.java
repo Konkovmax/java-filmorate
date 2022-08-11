@@ -33,8 +33,8 @@ public class ErrorHandlingControllerAdvice {
                 .body(new ErrorMessage(exception.getMessage()));
     }
 
-    @ExceptionHandler(ValidationException.class)
-    public ResponseEntity<ErrorMessage> handleException(ValidationException exception) {
+    @ExceptionHandler(BadRequestException.class)
+    public ResponseEntity<ErrorMessage> handleException(BadRequestException exception) {
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body(new ErrorMessage(exception.getMessage()));
