@@ -27,7 +27,7 @@ public class UserController {
 
     @PostMapping(value = "/users")
     public User create(@Valid @RequestBody User user) {
-        if (userValidate(user)) {
+        if (userRequestCheck(user)) {
             if (user.getName().isEmpty()) {
                 user.setName(user.getLogin());
                 user.setId(atomicInteger.incrementAndGet());
@@ -42,7 +42,7 @@ public class UserController {
         return user;
     }
 
-    public boolean userValidate(User user) throws BadRequestException {
+    public boolean userRequestCheck(User user) throws BadRequestException {
         if (user.getLogin().isEmpty()) {
             log.error("login can't be empty");
             throw new BadRequestException("login can't be empty");
@@ -64,7 +64,7 @@ public class UserController {
     }
 
     @PutMapping(value = "/users")
-    public User update(@RequestBody User user) {
+    public User update(@Valid @RequestBody User user) {
         if (users.containsKey(user.getId())) {
             users.put(user.getId(), user);
             log.info("User updated");
