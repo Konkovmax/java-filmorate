@@ -38,12 +38,10 @@ public class FilmController {
             log.info("Film updated");
         } else {
             log.warn("Film not found");
-            throw new NotFoundException("film not found");
+            throw new NotFoundException(String.format(
+                    "Film with id: %s not found",
+                    film.getId()));
         }
         return film;
     }
 }
-
-
-
-
