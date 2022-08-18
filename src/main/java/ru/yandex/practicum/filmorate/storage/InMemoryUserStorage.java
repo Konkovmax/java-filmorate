@@ -64,7 +64,7 @@ public class InMemoryUserStorage implements UserStorage{
 
     }
 
-    public User update(@Valid @RequestBody User user) {
+    public User update(User user) {
         if (users.containsKey(user.getId())) {
             users.put(user.getId(), user);
             log.info("User updated");
@@ -73,6 +73,14 @@ public class InMemoryUserStorage implements UserStorage{
             throw new NotFoundException("user not found");
         }
         return user;
+    }
+    public User getUser(int userId) {
+        if (!users.containsKey(userId)) {
+            log.warn("user not found");
+            throw new NotFoundException("user not found");
+        }
+            log.info("User found");
+        return users.get(userId);
     }
 
     public void generateId(){

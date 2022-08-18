@@ -19,11 +19,28 @@ public class UserController {
     @Autowired
     public UserController(InMemoryUserStorage userStorage, UserService userService) {
         this.userService = userService;
-            this.userStorage = userStorage;
+        this.userStorage = userStorage;
     }
+
     @GetMapping("/users")
     public List<User> findAll() {
-        return  userStorage.findAll();
+        return userStorage.findAll();
+    }
+
+    @GetMapping("/users/{id}/friends")
+    public List<User> getFriends(@PathVariable Integer id) {
+        log.info("getFriend");
+        return userService.getFriends(id);
+    }
+
+    @GetMapping("/users/{id}")
+    public User getUser(@PathVariable("id") Integer userId) {
+        return userStorage.getUser(userId);
+    }
+
+    @GetMapping("/users/{id}/friends/common/{friendId}")
+    public List<User> getCommonFriends(@PathVariable("id") Integer userId, @PathVariable("friendId") Integer friendId) {
+        return userService.getCommonFriends(userId, friendId);
     }
 
     @PostMapping(value = "/users")
@@ -34,13 +51,20 @@ public class UserController {
 
     @PutMapping(value = "/users")
     public User update(@Valid @RequestBody User user) {
-       userStorage.update(user);
+        userStorage.update(user);
         return user;
     }
 
-    @PutMapping(value = "/users/{id}/friends/{friendId}")
-    public void addFriend(@PathVariable("id") Integer userId, @PathVariable Integer friendId){
-        userService.addFriend(userId,friendId);
+
+      @PutMapping(value = "/users/{id}/friends/{friendId}")
+    public void addFriend(@PathVariable("id") Integer userId, @PathVariable Integer friendId) {
+        userService.addFriend(userId, friendId);
+    }
+
+
+    @DeleteMapping(value = "/users/{id}/friends/{friendId}")
+    public void removeFriend(@PathVariable("id") Integer userId, @PathVariable Integer friendId) {
+        userService.removeFriend(userId, friendId);
     }
 
 }
