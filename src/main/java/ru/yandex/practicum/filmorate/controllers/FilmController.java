@@ -43,4 +43,6 @@ public class FilmController {
      filmStorage.update(film);
         return film;
     }
+
+    @GetMapping("")
 }
