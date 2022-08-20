@@ -2,22 +2,17 @@ package ru.yandex.practicum.filmorate.storage;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 
-import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
+
 @Slf4j
 @Component
-public class InMemoryFilmStorage implements FilmStorage{
+public class InMemoryFilmStorage implements FilmStorage {
 
     public Map<Integer, Film> films = new HashMap<>();
     private int id = 1;
@@ -27,7 +22,7 @@ public class InMemoryFilmStorage implements FilmStorage{
     }
 
 
-    public Film create( Film film){
+    public Film create(Film film) {
         film.setId(id);
         generateId();
         films.put(film.getId(), film);
@@ -49,7 +44,17 @@ public class InMemoryFilmStorage implements FilmStorage{
         return film;
     }
 
-    public void generateId(){
+    public Film getFilm(int filmId) {
+        if (!films.containsKey(filmId)) {
+            log.warn("film not found");
+            throw new NotFoundException(String.format(
+                    "Film with id: %s not found", filmId));
+        }
+        log.info("Film found");
+        return films.get(filmId);
+    }
+
+    public void generateId() {
         id++;
     }
 }

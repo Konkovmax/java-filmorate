@@ -2,12 +2,10 @@ package ru.yandex.practicum.filmorate.storage;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.RequestBody;
 import ru.yandex.practicum.filmorate.exceptions.BadRequestException;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 
-import javax.validation.Valid;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -16,12 +14,12 @@ import java.util.Map;
 
 @Slf4j
 @Component
-public class InMemoryUserStorage implements UserStorage{
+public class InMemoryUserStorage implements UserStorage {
     public Map<Integer, User> users = new HashMap<>();
     private int id = 1;
 
     public List<User> findAll() {
-        return  new ArrayList<>(users.values());
+        return new ArrayList<>(users.values());
     }
 
     public User create(User user) {
@@ -70,20 +68,24 @@ public class InMemoryUserStorage implements UserStorage{
             log.info("User updated");
         } else {
             log.warn("user not found");
-            throw new NotFoundException("user not found");
+            throw new NotFoundException(String.format(
+                    "User with id: %s not found",
+                    user.getId()));
         }
         return user;
     }
+
     public User getUser(int userId) {
         if (!users.containsKey(userId)) {
             log.warn("user not found");
-            throw new NotFoundException("user not found");
+            throw new NotFoundException(String.format(
+                    "User with id: %s not found", userId));
         }
-            log.info("User found");
+        log.info("User found");
         return users.get(userId);
     }
 
-    public void generateId(){
-         id++;
+    public void generateId() {
+        id++;
     }
 }
