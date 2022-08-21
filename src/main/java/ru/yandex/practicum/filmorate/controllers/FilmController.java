@@ -5,7 +5,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.Service.FilmService;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.storage.InMemoryFilmStorage;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -13,29 +12,27 @@ import java.util.List;
 @Slf4j
 @RestController
 public class FilmController {
-    private final InMemoryFilmStorage filmStorage;
     private final FilmService filmService;
 
     @Autowired
-    public FilmController(InMemoryFilmStorage filmStorage, FilmService filmService) {
+    public FilmController(FilmService filmService) {
         this.filmService = filmService;
-        this.filmStorage = filmStorage;
     }
 
     @GetMapping("/films")
     public List<Film> findAll() {
-        return filmStorage.findAll();
+        return filmService.findAll();
     }
 
     @PostMapping(value = "/films")
     public Film create(@Valid @RequestBody Film film) {
-        filmStorage.create(film);
+        filmService.create(film);
         return film;
     }
 
     @PutMapping(value = "/films")
     public Film update(@Valid @RequestBody Film film) {
-        filmStorage.update(film);
+        filmService.update(film);
         return film;
     }
 
@@ -46,7 +43,7 @@ public class FilmController {
 
     @GetMapping("/films/{id}")
     public Film getFilm(@PathVariable("id") Integer filmId) {
-        return filmStorage.getFilm(filmId);
+        return filmService.getFilm(filmId);
     }
 
     @PutMapping(value = "/films/{id}/like/{userId}")

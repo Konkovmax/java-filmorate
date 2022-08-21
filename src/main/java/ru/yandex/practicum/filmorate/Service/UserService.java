@@ -14,11 +14,29 @@ import java.util.Map;
 @Slf4j
 @Service
 public class UserService {
-    public Map<Integer, User> users;
+    private final InMemoryUserStorage userStorage;
+    private Map<Integer, User> users;
 
     @Autowired
     public UserService(InMemoryUserStorage userStorage) {
-        users = userStorage.users;
+        users = userStorage.getUsers();
+        this.userStorage = userStorage;
+    }
+
+    public List<User> findAll() {
+        return userStorage.findAll();
+    }
+
+    public User create(User user){
+        return userStorage.create(user);
+    }
+
+    public User update(User user){
+        return userStorage.update(user);
+    }
+
+    public User getUser(int userId){
+        return userStorage.getUser(userId);
     }
 
     public void addFriend(int userId, int friendId) {

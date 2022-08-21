@@ -15,8 +15,12 @@ import java.util.Map;
 @Slf4j
 @Component
 public class InMemoryUserStorage implements UserStorage {
-    public Map<Integer, User> users = new HashMap<>();
+    private Map<Integer, User> users = new HashMap<>();
     private int id = 1;
+
+    public Map<Integer, User> getUsers() {
+        return users;
+    }
 
     public List<User> findAll() {
         return new ArrayList<>(users.values());
@@ -39,7 +43,6 @@ public class InMemoryUserStorage implements UserStorage {
 
         return user;
     }
-
 
     public boolean throwIfNotValid(User user) throws BadRequestException {
         if (user.getLogin().isEmpty()) {

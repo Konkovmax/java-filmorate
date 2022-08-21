@@ -15,14 +15,32 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 public class FilmService {
-    public Map<Integer, Film> films;
+    private final InMemoryFilmStorage filmStorage;
+    private Map<Integer, Film> films;
 
     @Autowired
     public FilmService(InMemoryFilmStorage filmStorage) {
-        films = filmStorage.films;
+        films = filmStorage.getFilms();
+        this.filmStorage = filmStorage;
     }
 
     private Comparator<Film> comparator = Comparator.comparingInt(t -> t.getLikes().size());
+
+    public List<Film> findAll() {
+        return filmStorage.findAll();
+    }
+
+    public Film create(Film film) {
+        return filmStorage.create(film);
+    }
+
+    public Film update(Film film) {
+        return filmStorage.update(film);
+    }
+
+    public Film getFilm(int filmId) {
+        return filmStorage.getFilm(filmId);
+    }
 
     public void addLike(int filmId, int userId) {
         if (!films.containsKey(filmId)) {
