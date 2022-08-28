@@ -28,6 +28,8 @@ public class Film {
     @Min(1)
     private int duration;
     private Set<Integer> likes = new HashSet<>();
+    private Set<Genre> genre = new HashSet<>();
+    private Rating rating;
 
     public void addLike(int likeId) {
         likes.add(likeId);

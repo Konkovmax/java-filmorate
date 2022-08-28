@@ -7,6 +7,7 @@ import org.springframework.validation.annotation.Validated;
 
 import javax.validation.constraints.Email;
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -23,6 +24,7 @@ public class User {
     private String email;
     private Set<Integer> friends = new HashSet<>();
 
+private HashMap<Integer,Boolean> mutualFriends = new HashMap<>();
     public void addFriend(int friendId) {
         friends.add(friendId);
     }
