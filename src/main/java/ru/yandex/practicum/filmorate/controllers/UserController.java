@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.controllers;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.Service.UserDbService;
 import ru.yandex.practicum.filmorate.Service.UserService;
 import ru.yandex.practicum.filmorate.model.User;
 
@@ -12,10 +13,11 @@ import java.util.List;
 @Slf4j
 @RestController
 public class UserController {
-    private final UserService userService;
-
+    private final UserDbService userService;
+//    private final UserService userService;
+    //TODO USE @QUALIFIER
     @Autowired
-    public UserController(UserService userService) {
+    public UserController(UserDbService userService) {
         this.userService = userService;
     }
 
