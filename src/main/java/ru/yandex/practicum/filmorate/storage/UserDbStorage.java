@@ -17,17 +17,12 @@ import java.util.*;
 @Slf4j
 @Component
 public class UserDbStorage implements UserStorage {
-    // private Map<Integer, User> users = new HashMap<>();
-    private int id = 1;
+
     private final JdbcTemplate jdbcTemplate;
 
     public UserDbStorage(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
-
-//    public Map<Integer, User> getUsers() {
-//        return users;
-//    }
 
     public List<User> findAll() {
         String sql = "select * from users";
@@ -35,16 +30,9 @@ public class UserDbStorage implements UserStorage {
     }
 
     public User create(User user) {
-            throwIfNotValid(user);
-        String sql = "select * from USERS where login = ?";
-        boolean userExist;
-        try {
-            jdbcTemplate.queryForObject(sql, this::mapRowToUser, user.getLogin());
-            userExist = true;
-        } catch (EmptyResultDataAccessException e) {
-            userExist = false;
-        }
-        if (!userExist) {
+        throwIfNotValid(user);
+
+        if (getUserIdFromDb(user.getLogin()) == 0) {
             if (user.getName().isEmpty()) {
                 user.setName(user.getLogin());
 //            user.setId(id);
@@ -53,7 +41,6 @@ public class UserDbStorage implements UserStorage {
                 log.warn("Name is empty. Login is used as a name.");
                 // return user;
             }
-            user.setId(id);
             //           generateId();
             String sqlQuery = "insert into users(Name, Login, Birthday, Email) " +
                     "values (?, ?, ?, ?)";
@@ -63,6 +50,7 @@ public class UserDbStorage implements UserStorage {
                     user.getBirthday(),
                     user.getEmail());
             log.info("User added");
+            user.setId(getUserIdFromDb(user.getLogin()));
         }
         return user;
     }
@@ -109,14 +97,16 @@ public class UserDbStorage implements UserStorage {
     }
 
     public User getUser(int userId) {
-//        if (!users.containsKey(userId)) {
-//            log.warn("user not found");
-//            throw new NotFoundException(String.format(
-//                    "User with id: %s not found", userId));
-//        }
-        log.info("User found");
-        String sql = "select * from USERS where userid = ?";
-        return jdbcTemplate.queryForObject(sql, this::mapRowToUser, id);
+
+        try {
+            String sql = "select * from USERS where userid = ?";
+            return jdbcTemplate.queryForObject(sql, this::mapRowToUser, userId);
+        } catch (EmptyResultDataAccessException e) {
+            log.warn("user not found");
+            throw new NotFoundException(String.format(
+                    "User with id: %s not found", userId));
+
+        }
 
     }
 
@@ -126,6 +116,15 @@ public class UserDbStorage implements UserStorage {
                 resultSet.getString("login"),
                 resultSet.getString("birthday"),
                 resultSet.getString("email"));
+    }
+
+    private int getUserIdFromDb(String login) {
+        String sql = "select * from USERS where login = ?";
+        try {
+            return jdbcTemplate.queryForObject(sql, this::mapRowToUser, login).getId();
+        } catch (EmptyResultDataAccessException e) {
+            return 0;
+        }
     }
 
 //    public void generateId() {
