@@ -1,103 +1,106 @@
-drop table LIKES;
-DROP TABLE Friends;
-drop  table USERS;
+DROP TABLE LIKES;
+DROP TABLE FRIENDS;
+DROP TABLE FILMS_GENRES;
+DROP TABLE GENRES;
+drop table FILMS;
+DROP TABLE RATINGS;
+DROP  TABLE USERS;
 CREATE TABLE IF NOT EXISTS
     "USERS" (
-                "USERID" int   NOT NULL AUTO_INCREMENT,
-                "NAME" varchar,
-                "LOGIN" varchar   NOT NULL,
-                "BIRTHDAY" date,
-                "EMAIL" varchar   NOT NULL,
-                CONSTRAINT "pk_Users" PRIMARY KEY (
+                "USERID" INT   NOT NULL AUTO_INCREMENT,
+                "NAME" VARCHAR,
+                "LOGIN" VARCHAR   NOT NULL,
+                "BIRTHDAY" DATE,
+                "EMAIL" VARCHAR   NOT NULL,
+                CONSTRAINT "PK_USERS" PRIMARY KEY (
                                                    "USERID"
                     )
 );
 
 CREATE TABLE IF NOT EXISTS "FRIENDS" (
-                                         "USERID" int   NOT NULL,
-                                         "FriendID" int   NOT NULL,
-                                         "Status" boolean,
-                                         CONSTRAINT "pk_Friends" PRIMARY KEY (
-                                         "USERID","FriendID"
-),
-    CONSTRAINT "fk_Friends_UserID" FOREIGN KEY("USERID")
+                                         "USERID" INT   NOT NULL,
+                                         "FRIENDID" INT   NOT NULL,
+                                         "STATUS" BOOLEAN,
+                                         CONSTRAINT "PK_FRIENDS" PRIMARY KEY (
+                                         "USERID","FRIENDID"
+)
+/*    CONSTRAINT "FK_FRIENDS_USERID" FOREIGN KEY("USERID")
     REFERENCES "USERS" ("USERID"),
-    CONSTRAINT "fk_Friends_FriendID" FOREIGN KEY("FriendID")
+    CONSTRAINT "FK_FRIENDS_FRIENDID" FOREIGN KEY("FRIENDID")
     REFERENCES "USERS" ("USERID")
+  */  );
+
+CREATE TABLE IF NOT EXISTS "FILMS" (
+                                       "FILMID" INT   NOT NULL,
+                                       "NAME" VARCHAR   NOT NULL,
+                                       "DESCRIPTION" VARCHAR(200),
+    "DURATION" INT,
+    "RELEASEDATE" DATE,
+    "RATING" INT   NOT NULL,
+    CONSTRAINT "PK_FILMS" PRIMARY KEY (
+    "FILMID"
+                                      )
+    --CONSTRAINT "FK_FILMS_RATING" FOREIGN KEY("RATING")
+    --REFERENCES "RATINGS" ("RATINGID")
     );
 
-CREATE TABLE IF NOT EXISTS "Films" (
-                                       "FilmID" int   NOT NULL,
-                                       "Name" varchar   NOT NULL,
-                                       "Description" varchar(200),
-    "Duration" int,
-    "ReleaseDate" date,
-    "Rating" int   NOT NULL,
-    CONSTRAINT "pk_Films" PRIMARY KEY (
-    "FilmID"
-                                      ),
-    CONSTRAINT "fk_Films_Rating" FOREIGN KEY("Rating")
-    REFERENCES "Ratings" ("RatingID")
-    );
-
-CREATE TABLE IF NOT EXISTS "Genres" (
-                                        "GenreID" int   NOT NULL,
-                                        "Genre" varchar   NOT NULL,
-                                        CONSTRAINT "pk_Genres" PRIMARY KEY (
-                                        "GenreID"
+CREATE TABLE IF NOT EXISTS "GENRES" (
+                                        "GENREID" INT   NOT NULL,
+                                        "GENRE" VARCHAR   NOT NULL,
+                                        CONSTRAINT "PK_GENRES" PRIMARY KEY (
+                                        "GENREID"
 )
     );
 
-CREATE TABLE IF NOT EXISTS "Ratings" (
-                                         "RatingID" int   NOT NULL,
-                                         "Rating" varchar   NOT NULL,
-                                         CONSTRAINT "pk_Ratings" PRIMARY KEY (
-                                         "RatingID"
+CREATE TABLE IF NOT EXISTS "RATINGS" (
+                                         "RATINGID" INT   NOT NULL,
+                                         "RATING" VARCHAR   NOT NULL,
+                                         CONSTRAINT "PK_RATINGS" PRIMARY KEY (
+                                         "RATINGID"
 )
     );
 
 CREATE TABLE IF NOT EXISTS "LIKES" (
-                                       "FilmID" int   NOT NULL,
-                                       "USERSID" int   NOT NULL,
-                                       CONSTRAINT "pk_Likes" PRIMARY KEY (
-                                       "FilmID","USERSID"
-),
-    CONSTRAINT "fk_Likes_FilmID" FOREIGN KEY("FilmID")
-    REFERENCES "Films" ("FilmID"),
-    CONSTRAINT "fk_Likes_UsersID" FOREIGN KEY("USERSID")
+                                       "FILMID" INT   NOT NULL,
+                                       "USERSID" INT   NOT NULL,
+                                       CONSTRAINT "PK_LIKES" PRIMARY KEY (
+                                       "FILMID","USERSID"
+)
+    /*CONSTRAINT "FK_LIKES_FILMID" FOREIGN KEY("FILMID")
+    REFERENCES "FILMS" ("FILMID"),
+    CONSTRAINT "FK_LIKES_USERSID" FOREIGN KEY("USERSID")
     REFERENCES "USERS" ("USERID")
-    );
+    */);
 
-CREATE TABLE IF NOT EXISTS "Films_genres" (
-                                              "GenreID" int   NOT NULL,
-                                              "FilmID" int   NOT NULL,
-                                              CONSTRAINT "pk_Films_genres" PRIMARY KEY (
-                                              "GenreID","FilmID"
-),
-    CONSTRAINT "fk_Films_genres_GenreID" FOREIGN KEY("GenreID")
-    REFERENCES "Genres" ("GenreID"),
-CONSTRAINT "fk_Films_genres_FilmID" FOREIGN KEY("FilmID")
-    REFERENCES "Films" ("FilmID")
-    );
+CREATE TABLE IF NOT EXISTS "FILMS_GENRES" (
+                                              "GENREID" INT   NOT NULL,
+                                              "FILMID" INT   NOT NULL,
+                                              CONSTRAINT "PK_FILMS_GENRES" PRIMARY KEY (
+                                              "GENREID","FILMID"
+)
+    /*CONSTRAINT "FK_FILMS_GENRES_GENREID" FOREIGN KEY("GENREID")
+    REFERENCES "GENRES" ("GENREID"),
+CONSTRAINT "FK_FILMS_GENRES_FILMID" FOREIGN KEY("FILMID")
+    REFERENCES "FILMS" ("FILMID")
+    */);
 
-/*ALTER TABLE "Friends" ADD CONSTRAINT "fk_Friends_UserID" FOREIGN KEY("UserID")
-    REFERENCES "Users" ("UserID");
+ALTER TABLE "FRIENDS" ADD CONSTRAINT "FK_FRIENDS_USERID" FOREIGN KEY("USERID")
+    REFERENCES "USERS" ("USERID");
 
-ALTER TABLE "Friends" ADD CONSTRAINT "fk_Friends_FriendID" FOREIGN KEY("FriendID")
-    REFERENCES "Users" ("UserID");
+ALTER TABLE "FRIENDS" ADD CONSTRAINT "FK_FRIENDS_FRIENDID" FOREIGN KEY("FRIENDID")
+    REFERENCES "USERS" ("USERID");
 
-ALTER TABLE "Films" ADD CONSTRAINT "fk_Films_Rating" FOREIGN KEY("Rating")
-    REFERENCES "Ratings" ("RatingID");
+ALTER TABLE "FILMS" ADD CONSTRAINT "FK_FILMS_RATING" FOREIGN KEY("RATING")
+    REFERENCES "RATINGS" ("RATINGID");
 
-ALTER TABLE "Likes" ADD CONSTRAINT "fk_Likes_FilmID" FOREIGN KEY("FilmID")
-    REFERENCES "Films" ("FilmID");
+ALTER TABLE "LIKES" ADD CONSTRAINT "FK_LIKES_FILMID" FOREIGN KEY("FILMID")
+    REFERENCES "FILMS" ("FILMID");
 
-ALTER TABLE "Likes" ADD CONSTRAINT "fk_Likes_UsersID" FOREIGN KEY("UsersID")
-    REFERENCES "Users" ("UserID");
+ALTER TABLE "LIKES" ADD CONSTRAINT "FK_LIKES_USERSID" FOREIGN KEY("USERSID")
+    REFERENCES "USERS" ("USERID");
 
-ALTER TABLE "Films_genres" ADD CONSTRAINT "fk_Films_genres_GenreID" FOREIGN KEY("GenreID")
-    REFERENCES "Genres" ("GenreID");
+ALTER TABLE "FILMS_GENRES" ADD CONSTRAINT "FK_FILMS_GENRES_GENREID" FOREIGN KEY("GENREID")
+    REFERENCES "GENRES" ("GENREID");
 
-ALTER TABLE "Films_genres" ADD CONSTRAINT "fk_Films_genres_FilmID" FOREIGN KEY("FilmID")
-    REFERENCES "Films" ("FilmID");
-*/
+ALTER TABLE "FILMS_GENRES" ADD CONSTRAINT "FK_FILMS_GENRES_FILMID" FOREIGN KEY("FILMID")
+    REFERENCES "FILMS" ("FILMID");

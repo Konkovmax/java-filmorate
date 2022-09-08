@@ -35,13 +35,8 @@ public class UserDbStorage implements UserStorage {
         if (getUserIdFromDb(user.getLogin()) == 0) {
             if (user.getName().isEmpty()) {
                 user.setName(user.getLogin());
-//            user.setId(id);
-//            generateId();
-//            users.put(user.getId(), user);
                 log.warn("Name is empty. Login is used as a name.");
-                // return user;
             }
-            //           generateId();
             String sqlQuery = "insert into users(Name, Login, Birthday, Email) " +
                     "values (?, ?, ?, ?)";
             jdbcTemplate.update(sqlQuery,
@@ -127,7 +122,68 @@ public class UserDbStorage implements UserStorage {
         }
     }
 
-//    public void generateId() {
-//        id++;
-//    }
+    private int userExistCheck(int id) {
+        String sql = "select * from USERS where userid = ?";
+        try {
+            return jdbcTemplate.queryForObject(sql, this::mapRowToUser, id).getId();
+        } catch (EmptyResultDataAccessException e) {
+            return 0;
+        }
+    }
+
+    public List<User> getCommonFriends(int userId, int friendId) {
+        String sql = "select u.* " +
+                "from friends as f1 " +
+                "join friends as f2 on f2.userId = ? " +
+                "and f2.friendId = f1.friendId " +
+                "join users as u on f1.friendId = u.userId " +
+                "where f1.userId = ?";
+
+        return jdbcTemplate.query(sql, this::mapRowToUser, userId, friendId);
+    }
+
+    public void addFriend(int userId, int friendId) {
+
+        if (userExistCheck(userId)==0) {
+            log.warn("User not found");
+            throw new NotFoundException(String.format(
+                    "User with id: %s not found",
+                    userId));
+        } else if (userExistCheck(friendId)==0) {
+            log.warn("Friend not found");
+            throw new NotFoundException(String.format(
+                    "Friend with id: %s not found",
+                    friendId));
+        } else {
+        String sqlQuery = "insert into friends(UserId, FriendId, status) " +
+                "values (?, ?, ?)";
+        jdbcTemplate.update(sqlQuery,
+                userId,friendId,false);
+            log.info("Friend added");
+        }
+    }
+
+    public List<User> getFriends(int userId) {
+        try {
+            String sql = "select u.* " +
+                "from friends as f1 " +
+                "join users as u on f1.friendId = u.userId " +
+                "where f1.userId = ?";
+            return jdbcTemplate.query(sql, this::mapRowToUser, userId);
+        } catch (EmptyResultDataAccessException e) {
+            log.warn("Friends not found");
+            throw new NotFoundException(String.format(
+                    "Friends of User with id: %s not found", userId));
+        }
+    }
+
+    public void removeFriend(int userId, int friendId) {
+       // try {
+            String sql = "DELETE FROM friends WHERE userid = ? and friendid = ?";
+        if(jdbcTemplate.update(sql, userId, friendId)==0){
+            log.warn("Friends not found");
+            throw new NotFoundException(String.format(
+                    "Friends of User with id: %s not found", userId));
+        }
+    }
 }
