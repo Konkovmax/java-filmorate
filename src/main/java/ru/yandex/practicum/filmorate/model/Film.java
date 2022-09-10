@@ -10,8 +10,11 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Size;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
+
+import static ru.yandex.practicum.filmorate.model.User.DATE_FORMATTER;
 
 @Data
 @AllArgsConstructor
@@ -28,8 +31,17 @@ public class Film {
     @Min(1)
     private int duration;
     private Set<Integer> likes = new HashSet<>();
-    private Set<Genre> genre = new HashSet<>();
-    private Rating rating;
+    private ArrayList<Genre> genre = new ArrayList<>();
+    private Mpa mpa;
+
+    public Film(int id, String name, String description, String releaseDate, int duration, int rating) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
+        this.releaseDate = LocalDate.parse(releaseDate, DATE_FORMATTER);
+        this.duration = duration;
+        this.mpa.setId(rating);
+    }
 
     public void addLike(int likeId) {
         likes.add(likeId);
