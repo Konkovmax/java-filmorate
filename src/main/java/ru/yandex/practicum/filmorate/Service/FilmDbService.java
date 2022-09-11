@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.storage.FilmDbStorage;
 import ru.yandex.practicum.filmorate.storage.InMemoryFilmStorage;
 
 import java.util.Comparator;
@@ -15,12 +16,12 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 public class FilmDbService {
-    private final InMemoryFilmStorage filmStorage;
+    private final FilmDbStorage filmStorage;
     private Map<Integer, Film> films;
 
     @Autowired
-    public FilmDbService(InMemoryFilmStorage filmStorage) {
-        films = filmStorage.getFilms();
+    public FilmDbService(FilmDbStorage filmStorage) {
+        //films = filmStorage.getFilms();
         this.filmStorage = filmStorage;
     }
 
@@ -72,10 +73,6 @@ public class FilmDbService {
     }
 
     public List<Film> getPopular(int count) {
-        List<Film> popFilms = films.values().stream().sorted(comparator.reversed()).collect(Collectors.toList());
-        if (count > popFilms.size()) {
-            count = popFilms.size();
-        }
-        return popFilms.subList(0, count);
+        return filmStorage.getPopular( count);
     }
 }

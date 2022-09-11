@@ -31,7 +31,7 @@ CREATE TABLE IF NOT EXISTS "FRIENDS" (
   */  );
 
 CREATE TABLE IF NOT EXISTS "FILMS" (
-                                       "FILMID" INT   NOT NULL,
+                                       "FILMID" INT   NOT NULL AUTO_INCREMENT,
                                        "NAME" VARCHAR   NOT NULL,
                                        "DESCRIPTION" VARCHAR(200),
     "DURATION" INT,

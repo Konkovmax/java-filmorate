@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.controllers;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.Service.FilmDbService;
 import ru.yandex.practicum.filmorate.Service.FilmService;
 import ru.yandex.practicum.filmorate.model.Film;
 
@@ -12,10 +13,11 @@ import java.util.List;
 @Slf4j
 @RestController
 public class FilmController {
-    private final FilmService filmService;
+    private final FilmDbService filmService;
+//    private final FilmService filmService;
 
     @Autowired
-    public FilmController(FilmService filmService) {
+    public FilmController(FilmDbService filmService) {
         this.filmService = filmService;
     }
 
@@ -27,6 +29,9 @@ public class FilmController {
     @PostMapping(value = "/films")
     public Film create(@Valid @RequestBody Film film) {
         filmService.create(film);
+//        return new Film(1,"name", "description", "1979-02-02", 100, 3);
+         //System.out.println(film.getMpa().getName());
+        //System.out.println(film.getMpa().getId());
         return film;
     }
 
