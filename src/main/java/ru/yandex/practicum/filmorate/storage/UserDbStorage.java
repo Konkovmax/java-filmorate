@@ -122,7 +122,7 @@ public class UserDbStorage implements UserStorage {
         }
     }
 
-    private int userExistCheck(int id) {
+    public int userExistCheck(int id) {
         String sql = "select * from USERS where userid = ?";
         try {
             return jdbcTemplate.queryForObject(sql, this::mapRowToUser, id).getId();
