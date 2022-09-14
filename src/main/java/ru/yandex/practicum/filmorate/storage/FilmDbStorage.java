@@ -73,14 +73,33 @@ public class FilmDbStorage implements FilmStorage {
             //todo fix it "INSERT ignore INTO FILMS_GENRES (genreid, filmid) VALUES (?,?) ON  DUPLICATE KEY UPDATE genreid = ?";
          //   int genreUpdateSuccess = 0;
         //Set<Genre> genres = new HashSet<>(film.getGenres());
-            for (Genre genre : film.getGenres()) {
+//            for (int i =0; i<film.getGenres().size(); i++) {
+////                genreUpdateSuccess = jdbcTemplate.update(sqlQuery, genre.getId(), film.getId());
+////                if(genreUpdateSuccess==0){
+//                try {
+//                    jdbcTemplate.update(sqlQuery2, film.getGenres().get(i), film.getId());
+//                }catch (DataAccessException e){
+//                    log.warn("Genres update error");
+//                     film.getGenres().remove(i);
+//                }
+//                }
+//        if(film.getGenres().size()>1) {
+//            HashMap<Integer, String> uniqueGenres = new HashMap<>();
+//            for (Genre genre : film.getGenres()) {
+//                uniqueGenres.put(genre.getId(), genre.getName());
+//            }
+//        }
+        film.setGenres(film.getGenres().stream()
+                        .distinct()
+                        .collect(Collectors.toList()));
+for (Genre genre : film.getGenres()) {
 //                genreUpdateSuccess = jdbcTemplate.update(sqlQuery, genre.getId(), film.getId());
 //                if(genreUpdateSuccess==0){
                 try {
                     jdbcTemplate.update(sqlQuery2, genre.getId(), film.getId());
                 }catch (DataAccessException e){
                     log.warn("Genres update error");
-                    film.getGenres().remove(genre);
+                    // film.getGenres().remove(genre);
                 }
                 }
         if (updateSuccess == 1) {
