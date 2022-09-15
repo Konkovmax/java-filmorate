@@ -50,7 +50,7 @@ public class UserDbStorage implements UserStorage {
         return user;
     }
 
-    public boolean throwIfNotValid(User user) throws BadRequestException {
+    private boolean throwIfNotValid(User user) throws BadRequestException {
         if (user.getLogin().isEmpty()) {
             log.error("login can't be empty");
             throw new BadRequestException("login can't be empty");
