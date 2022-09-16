@@ -6,3 +6,5 @@ INSERT INTO USERS (name, login, birthday, email)
 VALUES ( 'Mario', 'Super', '1989-01-05', 'mario@super.com'),
  ( 'Bon', 'Jovi', '1989-01-05', 'bon@jovi.com'),
  ( 'Ivan', 'Ivanov', '1989-01-05', 'ivan@ivanov.ru');
+INSERT INTO FRIENDS(userid, friendid)
+VALUES ( 1,2),(1,3),(2,1),(2,3);
