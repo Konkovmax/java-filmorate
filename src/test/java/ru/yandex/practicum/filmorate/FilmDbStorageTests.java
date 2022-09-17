@@ -8,6 +8,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.jdbc.Sql;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.storage.FilmDbStorage;
 import ru.yandex.practicum.filmorate.storage.FilmDbStorage;
 
@@ -67,9 +68,50 @@ class FilmDbStorageTests {
 	@Test
 	public void testFindGenres() {
 		List<Genre> allGenres = filmStorage.findGenres();
-		assertEquals(3, allFilms.size());
+		assertEquals(6, allGenres.size());
 	}
 
+	@Test
+	public void testFindMpa() {
+		List<Mpa> allMpa = filmStorage.findMpa();
+		assertEquals(5, allMpa.size());
+	}
 
+	@Test
+	public void testFindGenreById() {
+		Optional<Genre> filmOptional = Optional.of(filmStorage.getGenre(1));
+		assertThat(filmOptional)
+				.isPresent()
+				.hasValueSatisfying(film ->
+						assertThat(film).hasFieldOrPropertyWithValue("id", 1)
+				);
+	}
+	@Test
+	public void testFindMpaById() {
+		Optional<Mpa> filmOptional = Optional.of(filmStorage.getMpa(1));
+		assertThat(filmOptional)
+				.isPresent()
+				.hasValueSatisfying(film ->
+						assertThat(film).hasFieldOrPropertyWithValue("id", 1)
+				);
+	}
+
+	@Test
+	public void testGetPopular(){
+		List<Film> popularFilms = filmStorage.getPopular(2);
+		assertEquals("Bon", popularFilms.get(0).getName());
+	}
+
+	@Test
+	public void testAddLike(){
+		filmStorage.addLike(3,2);
+		assertEquals("Ivan", filmStorage.getPopular(1).get(0).getName());
+		}
+
+	@Test
+	public void testRemoveLike(){
+		filmStorage.removeLike(2,2);
+		assertEquals("Ivan", filmStorage.getPopular(1).get(0).getName());
+		}
 }
 

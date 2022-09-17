@@ -13,3 +13,5 @@ VALUES ( 'Mario', 'Super', 100, '1989-01-05', 1),
  ( 'Ivan', 'Ivanov', 80, '1989-01-05', 3);
 INSERT INTO FRIENDS(userid, friendid)
 VALUES ( 1,2),(1,3),(2,1),(2,3);
+
+insert into LIKES(filmid, usersid) VALUES ( 2,1 ),(2,2),(3,1),(3,3);
