@@ -6,5 +6,10 @@ INSERT INTO USERS (name, login, birthday, email)
 VALUES ( 'Mario', 'Super', '1989-01-05', 'mario@super.com'),
  ( 'Bon', 'Jovi', '1989-01-05', 'bon@jovi.com'),
  ( 'Ivan', 'Ivanov', '1989-01-05', 'ivan@ivanov.ru');
+
+INSERT INTO FILMS (name, description, duration, releasedate, rating)
+VALUES ( 'Mario', 'Super', 100, '1989-01-05', 1),
+ ( 'Bon', 'Jovi', 90, '1989-01-05', 2),
+ ( 'Ivan', 'Ivanov', 80, '1989-01-05', 3);
 INSERT INTO FRIENDS(userid, friendid)
 VALUES ( 1,2),(1,3),(2,1),(2,3);

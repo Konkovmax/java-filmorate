@@ -6,8 +6,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.jdbc.Sql;
-import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.UserDbStorage;
+import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.storage.FilmDbStorage;
+import ru.yandex.practicum.filmorate.storage.FilmDbStorage;
 
 import java.util.List;
 import java.util.Optional;
@@ -21,73 +23,53 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @Sql("/testschema.sql")
 @Sql("/testdata.sql")
 class FilmDbStorageTests {
-	private final UserDbStorage userStorage;// = new UserDbStorage(new JdbcTemplate());
+	private final FilmDbStorage filmStorage;// = new FilmDbStorage(new JdbcTemplate());
 
 	@Test
-	public void testFindUserById() {
-		Optional<User> userOptional = Optional.of(userStorage.getUser(1));
-		assertThat(userOptional)
+	public void testFindFilmById() {
+		Optional<Film> filmOptional = Optional.of(filmStorage.getFilm(1));
+		assertThat(filmOptional)
 				.isPresent()
-				.hasValueSatisfying(user ->
-						assertThat(user).hasFieldOrPropertyWithValue("id", 1)
+				.hasValueSatisfying(film ->
+						assertThat(film).hasFieldOrPropertyWithValue("id", 1)
 				);
 	}
 
 	@Test
-	public void testFindAllUsers() {
-		List<User> allUsers = userStorage.findAll();
-		assertEquals(3, allUsers.size());
+	public void testFindAllFilms() {
+		List<Film> allFilms = filmStorage.findAll();
+		assertEquals(3, allFilms.size());
 	}
 
 	@Test
-	public void testCreateUser() {
-		int userId = 4;
+	public void testCreateFilm() {
+		int filmId = 4;
 
-		User user = new User(userId, "Name", "login", "1989-02-01", "email@email.ru");
-		userStorage.create(user);
-		User savedUser = userStorage.getUser(userId);
-		savedUser.setId(userId);
-		assertEquals(user, savedUser, "Users not equal");
+		Film film = new Film(filmId, "Name", "login", "1989-02-01", 70,4, "R");
+		filmStorage.create(film);
+		Film savedFilm = filmStorage.getFilm(filmId);
+		savedFilm.setId(filmId);
+		assertEquals(film, savedFilm, "Films not equal");
 	}
 
 @Test
-	public void testUpdateUser() {
-		int userId = 3;
+	public void testUpdateFilm() {
+		int filmId = 3;
 
-		User user = new User(userId, "Name", "login", "1989-02-01", "email@email.ru");
-		userStorage.update(user);
-		User savedUser = userStorage.getUser(userId);
-		savedUser.setId(userId);
-		assertEquals(user, savedUser, "Users not equal");
+	Film film = new Film(filmId, "Name", "login", "1989-02-01", 70,4, "R");
+	filmStorage.update(film);
+		Film savedFilm = filmStorage.getFilm(filmId);
+		savedFilm.setId(filmId);
+		assertEquals(film, savedFilm, "Films not equal");
 	}
 
-	@Test
-	public void testUserExistCheck(){
-		assertEquals(0, userStorage.userExistCheck(5));
-	}
 
 	@Test
-	public void testCommonFriends(){
-		List<User> commonFriends = userStorage.getCommonFriends(1,2);
-		assertEquals("Ivan", commonFriends.get(0).getName());
+	public void testFindGenres() {
+		List<Genre> allGenres = filmStorage.findGenres();
+		assertEquals(3, allFilms.size());
 	}
 
-	@Test
-	public void testGetFriends(){
-		List<User> friends = userStorage.getFriends(1);
-		assertEquals(2, friends.size());
-	}
 
-	@Test
-	public void testAddFriend(){
-		userStorage.addFriend(3,1);
-		assertEquals("Mario",userStorage.getFriends(3).get(0).getName());
-	}
-
-	@Test
-	public void testRemoveFriends(){
-		userStorage.removeFriend(1,2);
-		assertEquals(1, userStorage.getFriends(1).size());
-	}
 }
 

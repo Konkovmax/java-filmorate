@@ -22,13 +22,13 @@ import java.util.stream.Collectors;
 @Component
 public class FilmDbStorage implements FilmStorage {
 
-    private Map<Integer, Film> films = new HashMap<>();
+//    private Map<Integer, Film> films = new HashMap<>();
     private int id = 1;
     private final UserDbStorage userStorage;
 
-    public Map<Integer, Film> getFilms() {
-        return films;
-    }
+//    public Map<Integer, Film> getFilms() {
+//        return films;
+//    }
 
     private final JdbcTemplate jdbcTemplate;
 
