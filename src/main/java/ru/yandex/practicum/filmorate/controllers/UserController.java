@@ -4,7 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.Service.UserDbService;
-import ru.yandex.practicum.filmorate.Service.UserService;
 import ru.yandex.practicum.filmorate.model.User;
 
 import javax.validation.Valid;
@@ -14,8 +13,7 @@ import java.util.List;
 @RestController
 public class UserController {
     private final UserDbService userService;
-//    private final UserService userService;
-    //TODO USE @QUALIFIER
+
     @Autowired
     public UserController(UserDbService userService) {
         this.userService = userService;

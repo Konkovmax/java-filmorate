@@ -2,25 +2,23 @@ package ru.yandex.practicum.filmorate.Service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
-import ru.yandex.practicum.filmorate.storage.UserDbStorage;
+import ru.yandex.practicum.filmorate.storage.UserStorage;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 @Slf4j
 @Service
 public class UserDbService {
-    private final UserDbStorage userStorage;
-    private Map<Integer, User> users;
+    private final UserStorage userStorage;
 
-    @Autowired //TODO TRY WITHOUT @AUTOWIRED
-    public UserDbService(UserDbStorage userStorage) {
-        //   users = userStorage.getUsers();
+    /* в ТЗ сказали использовать @Qualifier, но чтобы его задействовать мне пришлось в интерфейс добавить методы, которые
+    я использую в userDbStorage, и соответственно объявить их InMemoryUserStorage. Но может я что-то недопонял....
+    */
+    @Autowired
+    public UserDbService(@Qualifier("userDbStorage") UserStorage userStorage) {
         this.userStorage = userStorage;
     }
 
@@ -45,7 +43,7 @@ public class UserDbService {
     }
 
     public void removeFriend(int userId, int friendId) {
-        userStorage.removeFriend(userId,friendId);
+        userStorage.removeFriend(userId, friendId);
     }
 
     public List<User> getFriends(int userId) {

@@ -3,7 +3,6 @@ package ru.yandex.practicum.filmorate.storage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exceptions.BadRequestException;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
@@ -12,7 +11,7 @@ import ru.yandex.practicum.filmorate.model.User;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
-import java.util.*;
+import java.util.List;
 
 @Slf4j
 @Component
@@ -144,21 +143,21 @@ public class UserDbStorage implements UserStorage {
 
     public void addFriend(int userId, int friendId) {
 
-        if (userExistCheck(userId)==0) {
+        if (userExistCheck(userId) == 0) {
             log.warn("User not found");
             throw new NotFoundException(String.format(
                     "User with id: %s not found",
                     userId));
-        } else if (userExistCheck(friendId)==0) {
+        } else if (userExistCheck(friendId) == 0) {
             log.warn("Friend not found");
             throw new NotFoundException(String.format(
                     "Friend with id: %s not found",
                     friendId));
         } else {
-        String sqlQuery = "insert into friends(UserId, FriendId, status) " +
-                "values (?, ?, ?)";
-        jdbcTemplate.update(sqlQuery,
-                userId,friendId,false);
+            String sqlQuery = "insert into friends(UserId, FriendId, status) " +
+                    "values (?, ?, ?)";
+            jdbcTemplate.update(sqlQuery,
+                    userId, friendId, false);
             log.info("Friend added");
         }
     }
@@ -166,9 +165,9 @@ public class UserDbStorage implements UserStorage {
     public List<User> getFriends(int userId) {
         try {
             String sql = "select u.* " +
-                "from friends as f1 " +
-                "join users as u on f1.friendId = u.userId " +
-                "where f1.userId = ?";
+                    "from friends as f1 " +
+                    "join users as u on f1.friendId = u.userId " +
+                    "where f1.userId = ?";
             return jdbcTemplate.query(sql, this::mapRowToUser, userId);
         } catch (EmptyResultDataAccessException e) {
             log.warn("Friends not found");
@@ -178,9 +177,8 @@ public class UserDbStorage implements UserStorage {
     }
 
     public void removeFriend(int userId, int friendId) {
-       // try {
-            String sql = "DELETE FROM friends WHERE userid = ? and friendid = ?";
-        if(jdbcTemplate.update(sql, userId, friendId)==0){
+        String sql = "DELETE FROM friends WHERE userid = ? and friendid = ?";
+        if (jdbcTemplate.update(sql, userId, friendId) == 0) {
             log.warn("Friends not found");
             throw new NotFoundException(String.format(
                     "Friends of User with id: %s not found", userId));

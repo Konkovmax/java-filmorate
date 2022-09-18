@@ -33,7 +33,6 @@ public class Film {
     @Min(1)
     private int duration;
     private Set<Integer> likes = new HashSet<>();
-//    private Set<Genre> genres = new HashSet<>();
     private List<Genre> genres = new ArrayList<>();
     @NotNull
     private Mpa mpa;
@@ -45,7 +44,6 @@ public class Film {
         this.releaseDate = LocalDate.parse(releaseDate, DATE_FORMATTER);
         this.duration = duration;
         this.mpa = new Mpa(ratingId, null);
-        //this.mpa.setId(ratingId);
         this.mpa.setName(ratingName);
     }
 

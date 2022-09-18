@@ -5,10 +5,8 @@ import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 
-import javax.swing.text.DateFormatter;
 import javax.validation.constraints.Email;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -37,7 +35,8 @@ public class User {
         this.email = email;
     }
 
-    private HashMap<Integer,Boolean> mutualFriends = new HashMap<>();
+    private HashMap<Integer, Boolean> mutualFriends = new HashMap<>();
+
     public void addFriend(int friendId) {
         friends.add(friendId);
     }
