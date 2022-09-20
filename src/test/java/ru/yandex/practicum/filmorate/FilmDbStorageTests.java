@@ -10,6 +10,8 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.storage.FilmDbStorage;
+import ru.yandex.practicum.filmorate.storage.GenreDbStorage;
+import ru.yandex.practicum.filmorate.storage.MpaDbStorage;
 
 import java.util.List;
 import java.util.Optional;
@@ -24,6 +26,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @Sql("/testdata.sql")
 class FilmDbStorageTests {
     private final FilmDbStorage filmStorage;
+    private final MpaDbStorage mpaStorage;
+    private final GenreDbStorage genreStorage;
 
     @Test
     public void testGetPopular() {
@@ -71,19 +75,19 @@ class FilmDbStorageTests {
 
     @Test
     public void testFindGenres() {
-        List<Genre> allGenres = filmStorage.findGenres();
+        List<Genre> allGenres = genreStorage.findGenres();
         assertEquals(6, allGenres.size());
     }
 
     @Test
     public void testFindMpa() {
-        List<Mpa> allMpa = filmStorage.findMpa();
+        List<Mpa> allMpa = mpaStorage.findMpa();
         assertEquals(5, allMpa.size());
     }
 
     @Test
     public void testFindGenreById() {
-        Optional<Genre> filmOptional = Optional.of(filmStorage.getGenre(1));
+        Optional<Genre> filmOptional = Optional.of(genreStorage.getGenre(1));
         assertThat(filmOptional)
                 .isPresent()
                 .hasValueSatisfying(film ->
@@ -93,7 +97,7 @@ class FilmDbStorageTests {
 
     @Test
     public void testFindMpaById() {
-        Optional<Mpa> filmOptional = Optional.of(filmStorage.getMpa(1));
+        Optional<Mpa> filmOptional = Optional.of(mpaStorage.getMpa(1));
         assertThat(filmOptional)
                 .isPresent()
                 .hasValueSatisfying(film ->

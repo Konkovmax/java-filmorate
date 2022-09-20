@@ -1,10 +1,10 @@
-package ru.yandex.practicum.filmorate.Service;
+package ru.yandex.practicum.filmorate.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.UserDbStorage;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.util.List;
@@ -14,11 +14,8 @@ import java.util.List;
 public class UserDbService {
     private final UserStorage userStorage;
 
-    /* в ТЗ сказали использовать @Qualifier, но чтобы его задействовать мне пришлось в интерфейс добавить методы, которые
-    я использую в userDbStorage, и соответственно объявить их InMemoryUserStorage. Но может я что-то недопонял....
-    */
     @Autowired
-    public UserDbService(@Qualifier("userDbStorage") UserStorage userStorage) {
+    public UserDbService(UserDbStorage userStorage) {
         this.userStorage = userStorage;
     }
 

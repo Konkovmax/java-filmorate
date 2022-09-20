@@ -16,7 +16,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static ru.yandex.practicum.filmorate.model.User.DATE_FORMATTER;
+import static ru.yandex.practicum.filmorate.FilmorateApplication.DATE_FORMATTER;
 
 @Data
 @AllArgsConstructor
@@ -33,6 +33,7 @@ public class Film {
     @Min(1)
     private int duration;
     private Set<Integer> likes = new HashSet<>();
+
     private List<Genre> genres = new ArrayList<>();
     @NotNull
     private Mpa mpa;

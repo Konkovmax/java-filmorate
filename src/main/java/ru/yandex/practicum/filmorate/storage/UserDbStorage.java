@@ -24,8 +24,8 @@ public class UserDbStorage implements UserStorage {
     }
 
     public List<User> findAll() {
-        String sql = "select * from users";
-        return jdbcTemplate.query(sql, this::mapRowToUser);
+        String createQuery = "select * from users";
+        return jdbcTemplate.query(createQuery, this::mapRowToUser);
     }
 
     public User create(User user) {
@@ -36,9 +36,9 @@ public class UserDbStorage implements UserStorage {
                 user.setName(user.getLogin());
                 log.warn("Name is empty. Login is used as a name.");
             }
-            String sqlQuery = "insert into users(Name, Login, Birthday, Email) " +
+            String createQuery = "insert into users(Name, Login, Birthday, Email) " +
                     "values (?, ?, ?, ?)";
-            jdbcTemplate.update(sqlQuery,
+            jdbcTemplate.update(createQuery,
                     user.getName(),
                     user.getLogin(),
                     user.getBirthday(),
@@ -71,8 +71,8 @@ public class UserDbStorage implements UserStorage {
     }
 
     public User update(User user) {
-        String sqlQuery = "update users set Name = ?, Login = ?, Birthday = ?, Email = ? where UserID = ?";
-        int updateSuccess = jdbcTemplate.update(sqlQuery,
+        String createQuery = "update users set Name = ?, Login = ?, Birthday = ?, Email = ? where UserID = ?";
+        int updateSuccess = jdbcTemplate.update(createQuery,
                 user.getName(),
                 user.getLogin(),
                 user.getBirthday(),
@@ -93,8 +93,8 @@ public class UserDbStorage implements UserStorage {
     public User getUser(int userId) {
 
         try {
-            String sql = "select * from USERS where userid = ?";
-            return jdbcTemplate.queryForObject(sql, this::mapRowToUser, userId);
+            String createQuery = "select * from USERS where userid = ?";
+            return jdbcTemplate.queryForObject(createQuery, this::mapRowToUser, userId);
         } catch (EmptyResultDataAccessException e) {
             log.warn("user not found");
             throw new NotFoundException(String.format(
@@ -113,32 +113,32 @@ public class UserDbStorage implements UserStorage {
     }
 
     private int getUserIdFromDb(String login) {
-        String sql = "select * from USERS where login = ?";
+        String createQuery = "select * from USERS where login = ?";
         try {
-            return jdbcTemplate.queryForObject(sql, this::mapRowToUser, login).getId();
+            return jdbcTemplate.queryForObject(createQuery, this::mapRowToUser, login).getId();
         } catch (EmptyResultDataAccessException e) {
             return 0;
         }
     }
 
     public int userExistCheck(int id) {
-        String sql = "select * from USERS where userid = ?";
+        String createQuery = "select * from USERS where userid = ?";
         try {
-            return jdbcTemplate.queryForObject(sql, this::mapRowToUser, id).getId();
+            return jdbcTemplate.queryForObject(createQuery, this::mapRowToUser, id).getId();
         } catch (EmptyResultDataAccessException e) {
             return 0;
         }
     }
 
     public List<User> getCommonFriends(int userId, int friendId) {
-        String sql = "select u.* " +
+        String createQuery = "select u.* " +
                 "from friends as f1 " +
                 "join friends as f2 on f2.userId = ? " +
                 "and f2.friendId = f1.friendId " +
                 "join users as u on f1.friendId = u.userId " +
                 "where f1.userId = ?";
 
-        return jdbcTemplate.query(sql, this::mapRowToUser, userId, friendId);
+        return jdbcTemplate.query(createQuery, this::mapRowToUser, userId, friendId);
     }
 
     public void addFriend(int userId, int friendId) {
@@ -154,9 +154,9 @@ public class UserDbStorage implements UserStorage {
                     "Friend with id: %s not found",
                     friendId));
         } else {
-            String sqlQuery = "insert into friends(UserId, FriendId, status) " +
+            String createQuery = "insert into friends(UserId, FriendId, status) " +
                     "values (?, ?, ?)";
-            jdbcTemplate.update(sqlQuery,
+            jdbcTemplate.update(createQuery,
                     userId, friendId, false);
             log.info("Friend added");
         }
@@ -164,11 +164,11 @@ public class UserDbStorage implements UserStorage {
 
     public List<User> getFriends(int userId) {
         try {
-            String sql = "select u.* " +
+            String createQuery = "select u.* " +
                     "from friends as f1 " +
                     "join users as u on f1.friendId = u.userId " +
                     "where f1.userId = ?";
-            return jdbcTemplate.query(sql, this::mapRowToUser, userId);
+            return jdbcTemplate.query(createQuery, this::mapRowToUser, userId);
         } catch (EmptyResultDataAccessException e) {
             log.warn("Friends not found");
             throw new NotFoundException(String.format(
@@ -177,8 +177,8 @@ public class UserDbStorage implements UserStorage {
     }
 
     public void removeFriend(int userId, int friendId) {
-        String sql = "DELETE FROM friends WHERE userid = ? and friendid = ?";
-        if (jdbcTemplate.update(sql, userId, friendId) == 0) {
+        String createQuery = "DELETE FROM friends WHERE userid = ? and friendid = ?";
+        if (jdbcTemplate.update(createQuery, userId, friendId) == 0) {
             log.warn("Friends not found");
             throw new NotFoundException(String.format(
                     "Friends of User with id: %s not found", userId));

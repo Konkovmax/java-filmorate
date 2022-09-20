@@ -8,7 +8,6 @@ import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
-import ru.yandex.practicum.filmorate.model.Mpa;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -20,52 +19,54 @@ import java.util.stream.Collectors;
 public class FilmDbStorage implements FilmStorage {
 
     private final UserDbStorage userStorage;
+    private final GenreDbStorage genreStorage;
 
     private final JdbcTemplate jdbcTemplate;
 
-    public FilmDbStorage(JdbcTemplate jdbcTemplate, UserDbStorage userStorage) {
+    public FilmDbStorage(JdbcTemplate jdbcTemplate, UserDbStorage userStorage, GenreDbStorage genreStorage) {
         this.jdbcTemplate = jdbcTemplate;
         this.userStorage = userStorage;
+        this.genreStorage = genreStorage;
     }
 
     public Film create(Film film) {
-        String sqlQuery = "insert into films(Name, DESCRIPTION, DURATION, RELEASEDATE, RATING) " +
+        String createQuery = "insert into films(Name, DESCRIPTION, DURATION, RELEASEDATE, RATING) " +
                 "values (?, ?, ?, ?, ?)";
-        jdbcTemplate.update(sqlQuery,
+        jdbcTemplate.update(createQuery,
                 film.getName(),
                 film.getDescription(),
                 film.getDuration(),
                 film.getReleaseDate(),
                 film.getMpa().getId());
-        sqlQuery = "insert into FILMS_GENRES(genreid, filmid) " +
+        createQuery = "insert into FILMS_GENRES(genreid, filmid) " +
                 "                values (?, ?)";
         film.setId(getFilmIdFromDb(film.getName()));
         for (Genre genre : film.getGenres()) {
-            jdbcTemplate.update(sqlQuery, genre.getId(), film.getId());
+            jdbcTemplate.update(createQuery, genre.getId(), film.getId());
         }
         log.info("Film added");
         return film;
     }
 
     public Film update(Film film) {
-        String sqlQuery = "update films set Name = ?, DESCRIPTION = ?, DURATION = ?, RELEASEDATE = ?, RATING =? where FILMID = ?";
-        int updateSuccess = jdbcTemplate.update(sqlQuery,
+        String createQuery = "update films set Name = ?, DESCRIPTION = ?, DURATION = ?, RELEASEDATE = ?, RATING =? where FILMID = ?";
+        int updateSuccess = jdbcTemplate.update(createQuery,
                 film.getName(),
                 film.getDescription(),
                 film.getDuration(),
                 film.getReleaseDate(),
                 film.getMpa().getId(),
                 film.getId());
-        sqlQuery = "delete from FILMS_GENRES where  filmid = ? ";
-        jdbcTemplate.update(sqlQuery, film.getId());
-        String sqlQuery2 = "insert into FILMS_GENRES(genreid, filmid) values (?, ?)";
+        createQuery = "delete from FILMS_GENRES where  filmid = ? ";
+        jdbcTemplate.update(createQuery, film.getId());
+        String createQuery2 = "insert into FILMS_GENRES(genreid, filmid) values (?, ?)";
 
         film.setGenres(film.getGenres().stream()
                 .distinct()
                 .collect(Collectors.toList()));
         for (Genre genre : film.getGenres()) {
             try {
-                jdbcTemplate.update(sqlQuery2, genre.getId(), film.getId());
+                jdbcTemplate.update(createQuery2, genre.getId(), film.getId());
             } catch (DataAccessException e) {
                 log.warn("Genres update error");
             }
@@ -82,23 +83,20 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     public List<Film> findAll() {
-        String sql = "select f.*, r.RATING as ratingName" +
+        String createQuery = "select f.*, r.RATING as ratingName" +
                 "                 from films f" +
                 "                 join RATINGS R on R.RATINGID = F.RATING";
-        return jdbcTemplate.query(sql, this::mapRowToFilm);
+        return jdbcTemplate.query(createQuery, this::mapRowToFilm);
     }
 
     public Film getFilm(int filmId) {
         Film film;
-        String sql = "select f.*, r.RATING as ratingName" +
+        String createQuery = "select f.*, r.RATING as ratingName" +
                 " from films f" +
                 " join RATINGS R on R.RATINGID = F.RATING where f.FILMID = ?";
         try {
-            film = jdbcTemplate.queryForObject(sql, this::mapRowToFilm, filmId);
-            sql = "select g.* " +
-                    " from GENRES g" +
-                    " join FILMS_GENRES f on g.GENREID = f.GENREID where f.FILMID = ?";
-            List<Genre> genres = jdbcTemplate.query(sql, this::mapRowToGenre, filmId);
+            film = jdbcTemplate.queryForObject(createQuery, this::mapRowToFilm, filmId);
+            List<Genre> genres = genreStorage.getFilmsGenre(filmId);
             film.setGenres(genres);
             return film;
 
@@ -109,42 +107,8 @@ public class FilmDbStorage implements FilmStorage {
         }
     }
 
-    public List<Genre> findGenres() {
-        String sql = "select * from GENRES";
-        return jdbcTemplate.query(sql, this::mapRowToGenre);
-    }
-
-    public Genre getGenre(int genreId) {
-        try {
-            String sql = "select * from GENRES where GENREID = ?";
-            return jdbcTemplate.queryForObject(sql, this::mapRowToGenre, genreId);
-
-        } catch (EmptyResultDataAccessException e) {
-            log.warn("genre not found");
-            throw new NotFoundException(String.format(
-                    "Genre with id: %s not found", genreId));
-        }
-    }
-
-    public List<Mpa> findMpa() {
-        String sql = "select * from RATINGS";
-        return jdbcTemplate.query(sql, this::mapRowToMpa);
-    }
-
-    public Mpa getMpa(int MpaId) {
-        try {
-            String sql = "select * from RATINGS where RATINGID = ?";
-            return jdbcTemplate.queryForObject(sql, this::mapRowToMpa, MpaId);
-
-        } catch (EmptyResultDataAccessException e) {
-            log.warn("Mpa not found");
-            throw new NotFoundException(String.format(
-                    "Mpa with id: %s not found", MpaId));
-        }
-    }
-
     public List<Film> getPopular(int count) {
-        String sql = "select f.*, r.RATING as ratingName, count(l.USERSID) " +
+        String createQuery = "select f.*, r.RATING as ratingName, count(l.USERSID) " +
                 "from FILMS as f " +
                 " left outer join LIKES as l " +
                 "on f.filmId = l.FILMID " +
@@ -153,13 +117,13 @@ public class FilmDbStorage implements FilmStorage {
                 "order by count(l.USERSID) desc, f.NAME " +
                 "limit ?";
 
-        return jdbcTemplate.query(sql, this::mapRowToFilm, count);
+        return jdbcTemplate.query(createQuery, this::mapRowToFilm, count);
     }
 
     public void addLike(int filmId, int userId) {
-        String sqlQuery = "insert into LIKES(filmid, usersid) " +
+        String createQuery = "insert into LIKES(filmid, usersid) " +
                 "values (?, ?)";
-        jdbcTemplate.update(sqlQuery, filmId, userId);
+        jdbcTemplate.update(createQuery, filmId, userId);
     }
 
     public void removeLike(int filmId, int userId) {
@@ -169,8 +133,8 @@ public class FilmDbStorage implements FilmStorage {
                     "User with id: %s not found",
                     userId));
         } else {
-            String sql = "DELETE FROM likes WHERE usersid = ? and filmid = ?";
-            jdbcTemplate.update(sql, userId, filmId);
+            String createQuery = "DELETE FROM likes WHERE usersid = ? and filmid = ?";
+            jdbcTemplate.update(createQuery, userId, filmId);
             log.info("Like removed");
         }
     }
@@ -185,22 +149,12 @@ public class FilmDbStorage implements FilmStorage {
                 resultSet.getString("ratingName"));
     }
 
-    private Genre mapRowToGenre(ResultSet resultSet, int rowNum) throws SQLException {
-        return new Genre(Integer.parseInt(resultSet.getString("genreid")),
-                resultSet.getString("genre"));
-    }
-
-    private Mpa mapRowToMpa(ResultSet resultSet, int rowNum) throws SQLException {
-        return new Mpa(Integer.parseInt(resultSet.getString("ratingid")),
-                resultSet.getString("rating"));
-    }
-
     private int getFilmIdFromDb(String name) {
-        String sql = "select f.*, r.RATING as ratingName" +
+        String createQuery = "select f.*, r.RATING as ratingName" +
                 " from films f" +
                 " join RATINGS R on R.RATINGID = F.RATING where f.name = ?";
         try {
-            return jdbcTemplate.queryForObject(sql, this::mapRowToFilm, name).getId();
+            return jdbcTemplate.queryForObject(createQuery, this::mapRowToFilm, name).getId();
         } catch (EmptyResultDataAccessException e) {
             return 0;
         }

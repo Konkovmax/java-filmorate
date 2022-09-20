@@ -7,10 +7,11 @@ import org.springframework.validation.annotation.Validated;
 
 import javax.validation.constraints.Email;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
+
+import static ru.yandex.practicum.filmorate.FilmorateApplication.DATE_FORMATTER;
 
 @Data
 @AllArgsConstructor
@@ -24,8 +25,6 @@ public class User {
     @Email
     private String email;
     private Set<Integer> friends = new HashSet<>();
-    public static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-
 
     public User(int id, String name, String login, String birthday, String email) {
         this.id = id;
