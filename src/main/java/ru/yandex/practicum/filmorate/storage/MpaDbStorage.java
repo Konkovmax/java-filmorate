@@ -20,14 +20,15 @@ public class MpaDbStorage {
     public MpaDbStorage(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
+
     public List<Mpa> findMpa() {
-        String createQuery = "select * from RATINGS";
+        String createQuery = "select * from MPA";
         return jdbcTemplate.query(createQuery, this::mapRowToMpa);
     }
 
     public Mpa getMpa(int MpaId) {
         try {
-            String createQuery = "select * from RATINGS where RATINGID = ?";
+            String createQuery = "select * from MPA where MPAID = ?";
             return jdbcTemplate.queryForObject(createQuery, this::mapRowToMpa, MpaId);
 
         } catch (EmptyResultDataAccessException e) {
@@ -38,7 +39,7 @@ public class MpaDbStorage {
     }
 
     private Mpa mapRowToMpa(ResultSet resultSet, int rowNum) throws SQLException {
-        return new Mpa(Integer.parseInt(resultSet.getString("ratingid")),
-                resultSet.getString("rating"));
+        return new Mpa(Integer.parseInt(resultSet.getString("mpaid")),
+                resultSet.getString("mpa"));
     }
 }

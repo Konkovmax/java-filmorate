@@ -30,7 +30,7 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     public Film create(Film film) {
-        String createQuery = "insert into films(Name, DESCRIPTION, DURATION, RELEASEDATE, RATING) " +
+        String createQuery = "insert into films(Name, DESCRIPTION, DURATION, RELEASEDATE, MPAID) " +
                 "values (?, ?, ?, ?, ?)";
         jdbcTemplate.update(createQuery,
                 film.getName(),
@@ -49,7 +49,7 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     public Film update(Film film) {
-        String createQuery = "update films set Name = ?, DESCRIPTION = ?, DURATION = ?, RELEASEDATE = ?, RATING =? where FILMID = ?";
+        String createQuery = "update films set Name = ?, DESCRIPTION = ?, DURATION = ?, RELEASEDATE = ?, MPAID =? where FILMID = ?";
         int updateSuccess = jdbcTemplate.update(createQuery,
                 film.getName(),
                 film.getDescription(),
@@ -83,21 +83,19 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     public List<Film> findAll() {
-        String createQuery = "select f.*, r.RATING as ratingName" +
+        String createQuery = "select f.*, r.MPA as mpaName" +
                 "                 from films f" +
-                "                 join RATINGS R on R.RATINGID = F.RATING";
+                "                 join MPA R on R.MPAID = F.MPAID";
         return jdbcTemplate.query(createQuery, this::mapRowToFilm);
     }
 
     public Film getFilm(int filmId) {
         Film film;
-        String createQuery = "select f.*, r.RATING as ratingName" +
+        String createQuery = "select f.*, r.MPA as mpaName" +
                 " from films f" +
-                " join RATINGS R on R.RATINGID = F.RATING where f.FILMID = ?";
+                " join MPA R on R.MPAID = F.MPAID where f.FILMID = ?";
         try {
             film = jdbcTemplate.queryForObject(createQuery, this::mapRowToFilm, filmId);
-            List<Genre> genres = genreStorage.getFilmsGenre(filmId);
-            film.setGenres(genres);
             return film;
 
         } catch (EmptyResultDataAccessException e) {
@@ -108,11 +106,11 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     public List<Film> getPopular(int count) {
-        String createQuery = "select f.*, r.RATING as ratingName, count(l.USERSID) " +
+        String createQuery = "select f.*, r.MPA as mpaName, count(l.USERSID) " +
                 "from FILMS as f " +
                 " left outer join LIKES as l " +
                 "on f.filmId = l.FILMID " +
-                "join RATINGS R on R.RATINGID = f.RATING " +
+                "join MPA R on R.MPAID = f.MPAID " +
                 "GROUP BY f.FILMID " +
                 "order by count(l.USERSID) desc, f.NAME " +
                 "limit ?";
@@ -140,19 +138,22 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     private Film mapRowToFilm(ResultSet resultSet, int rowNum) throws SQLException {
-        return new Film(Integer.parseInt(resultSet.getString("filmid")),
+        Film film = new Film(Integer.parseInt(resultSet.getString("filmid")),
                 resultSet.getString("name"),
                 resultSet.getString("description"),
                 resultSet.getString("releasedate"),
                 Integer.parseInt(resultSet.getString("duration")),
-                Integer.parseInt(resultSet.getString("rating")),
-                resultSet.getString("ratingName"));
+                Integer.parseInt(resultSet.getString("mpaid")),
+                resultSet.getString("mpaName"));
+        List<Genre> genres = genreStorage.getFilmsGenre(film.getId());
+        film.setGenres(genres);
+        return film;
     }
 
     private int getFilmIdFromDb(String name) {
-        String createQuery = "select f.*, r.RATING as ratingName" +
+        String createQuery = "select f.*, r.mpa as mpaName" +
                 " from films f" +
-                " join RATINGS R on R.RATINGID = F.RATING where f.name = ?";
+                " join mpa R on R.mpaid = F.mpaid where f.name = ?";
         try {
             return jdbcTemplate.queryForObject(createQuery, this::mapRowToFilm, name).getId();
         } catch (EmptyResultDataAccessException e) {
