@@ -4,12 +4,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Mpa;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Component
@@ -26,15 +26,14 @@ public class MpaDbStorage {
         return jdbcTemplate.query(createQuery, this::mapRowToMpa);
     }
 
-    public Mpa getMpa(int MpaId) {
+    public Optional<Mpa> getMpa(int MpaId) {
         try {
             String createQuery = "select * from MPA where MPAID = ?";
-            return jdbcTemplate.queryForObject(createQuery, this::mapRowToMpa, MpaId);
+            return Optional.of(jdbcTemplate.queryForObject(createQuery, this::mapRowToMpa, MpaId));
 
         } catch (EmptyResultDataAccessException e) {
             log.warn("Mpa not found");
-            throw new NotFoundException(String.format(
-                    "Mpa with id: %s not found", MpaId));
+            return Optional.ofNullable(null);
         }
     }
 

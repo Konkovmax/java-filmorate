@@ -22,6 +22,7 @@ public class User {
     private String name;
     private String login;
     private LocalDate birthday;
+
     @Email
     private String email;
     private Set<Integer> friends = new HashSet<>();

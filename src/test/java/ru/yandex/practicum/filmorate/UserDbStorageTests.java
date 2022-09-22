@@ -25,7 +25,7 @@ class UserDbStorageTests {
 
     @Test
     public void testFindUserById() {
-        Optional<User> userOptional = Optional.of(userStorage.getUser(1));
+        Optional<User> userOptional = userStorage.getUser(1);
         assertThat(userOptional)
                 .isPresent()
                 .hasValueSatisfying(user ->
@@ -45,7 +45,7 @@ class UserDbStorageTests {
 
         User user = new User(userId, "Name", "login", "1989-02-01", "email@email.ru");
         userStorage.create(user);
-        User savedUser = userStorage.getUser(userId);
+        User savedUser = userStorage.getUser(userId).get();
         savedUser.setId(userId);
         assertEquals(user, savedUser, "Users not equal");
     }
@@ -56,7 +56,7 @@ class UserDbStorageTests {
 
         User user = new User(userId, "Name", "login", "1989-02-01", "email@email.ru");
         userStorage.update(user);
-        User savedUser = userStorage.getUser(userId);
+        User savedUser = userStorage.getUser(userId).get();
         savedUser.setId(userId);
         assertEquals(user, savedUser, "Users not equal");
     }

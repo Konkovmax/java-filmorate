@@ -4,12 +4,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Genre;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Component
@@ -26,15 +26,14 @@ public class GenreDbStorage {
         return jdbcTemplate.query(createQuery, this::mapRowToGenre);
     }
 
-    public Genre getGenre(int genreId) {
+    public Optional<Genre> getGenre(int genreId) {
         try {
             String createQuery = "select * from GENRES where GENREID = ?";
-            return jdbcTemplate.queryForObject(createQuery, this::mapRowToGenre, genreId);
+            return Optional.of(jdbcTemplate.queryForObject(createQuery, this::mapRowToGenre, genreId));
 
         } catch (EmptyResultDataAccessException e) {
             log.warn("genre not found");
-            throw new NotFoundException(String.format(
-                    "Genre with id: %s not found", genreId));
+            return Optional.ofNullable(null);
         }
     }
 

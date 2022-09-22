@@ -24,17 +24,21 @@ import static ru.yandex.practicum.filmorate.FilmorateApplication.DATE_FORMATTER;
 @Validated
 public class Film {
     private int id;
+
     @NotEmpty
     private String name;
+
     @Size(max = 200)
     private String description;
+
     @ReleaseDate
     private LocalDate releaseDate;
+
     @Min(1)
     private int duration;
     private Set<Integer> likes = new HashSet<>();
-
     private List<Genre> genres = new ArrayList<>();
+
     @NotNull
     private Mpa mpa;
 

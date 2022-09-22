@@ -5,27 +5,23 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
 @Slf4j
 @Component
 public class FilmDbStorage implements FilmStorage {
 
-    private final UserDbStorage userStorage;
     private final GenreDbStorage genreStorage;
-
     private final JdbcTemplate jdbcTemplate;
 
-    public FilmDbStorage(JdbcTemplate jdbcTemplate, UserDbStorage userStorage, GenreDbStorage genreStorage) {
+    public FilmDbStorage(JdbcTemplate jdbcTemplate, GenreDbStorage genreStorage) {
         this.jdbcTemplate = jdbcTemplate;
-        this.userStorage = userStorage;
         this.genreStorage = genreStorage;
     }
 
@@ -48,7 +44,7 @@ public class FilmDbStorage implements FilmStorage {
         return film;
     }
 
-    public Film update(Film film) {
+    public Optional<Film> update(Film film) {
         String createQuery = "update films set Name = ?, DESCRIPTION = ?, DURATION = ?, RELEASEDATE = ?, MPAID =? where FILMID = ?";
         int updateSuccess = jdbcTemplate.update(createQuery,
                 film.getName(),
@@ -57,29 +53,21 @@ public class FilmDbStorage implements FilmStorage {
                 film.getReleaseDate(),
                 film.getMpa().getId(),
                 film.getId());
-        createQuery = "delete from FILMS_GENRES where  filmid = ? ";
-        jdbcTemplate.update(createQuery, film.getId());
-        String createQuery2 = "insert into FILMS_GENRES(genreid, filmid) values (?, ?)";
-
-        film.setGenres(film.getGenres().stream()
-                .distinct()
-                .collect(Collectors.toList()));
-        for (Genre genre : film.getGenres()) {
-            try {
-                jdbcTemplate.update(createQuery2, genre.getId(), film.getId());
-            } catch (DataAccessException e) {
-                log.warn("Genres update error");
-            }
-        }
         if (updateSuccess == 1) {
-            log.info("Film updated");
+            createQuery = "delete from FILMS_GENRES where  filmid = ? ";
+            jdbcTemplate.update(createQuery, film.getId());
+            String createQuery2 = "insert into FILMS_GENRES(genreid, filmid) values (?, ?)";
+            for (Genre genre : film.getGenres()) {
+                try {
+                    jdbcTemplate.update(createQuery2, genre.getId(), film.getId());
+                } catch (DataAccessException e) {
+                    log.warn("Genres update error");
+                }
+            }
+            return Optional.of(film);
         } else {
-            log.warn("Film not found");
-            throw new NotFoundException(String.format(
-                    "Film with id: %s not found",
-                    film.getId()));
+            return Optional.ofNullable(null);
         }
-        return film;
     }
 
     public List<Film> findAll() {
@@ -89,19 +77,18 @@ public class FilmDbStorage implements FilmStorage {
         return jdbcTemplate.query(createQuery, this::mapRowToFilm);
     }
 
-    public Film getFilm(int filmId) {
+    public Optional<Film> getFilm(int filmId) {
         Film film;
         String createQuery = "select f.*, r.MPA as mpaName" +
                 " from films f" +
                 " join MPA R on R.MPAID = F.MPAID where f.FILMID = ?";
         try {
             film = jdbcTemplate.queryForObject(createQuery, this::mapRowToFilm, filmId);
-            return film;
+            return Optional.of(film);
 
         } catch (EmptyResultDataAccessException e) {
             log.warn("film not found");
-            throw new NotFoundException(String.format(
-                    "Film with id: %s not found", filmId));
+            return Optional.ofNullable(null);
         }
     }
 
@@ -125,16 +112,10 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     public void removeLike(int filmId, int userId) {
-        if (userStorage.userExistCheck(userId) == 0) {
-            log.warn("User not found");
-            throw new NotFoundException(String.format(
-                    "User with id: %s not found",
-                    userId));
-        } else {
-            String createQuery = "DELETE FROM likes WHERE usersid = ? and filmid = ?";
-            jdbcTemplate.update(createQuery, userId, filmId);
-            log.info("Like removed");
-        }
+
+        String createQuery = "DELETE FROM likes WHERE usersid = ? and filmid = ?";
+        jdbcTemplate.update(createQuery, userId, filmId);
+        log.info("Like removed");
     }
 
     private Film mapRowToFilm(ResultSet resultSet, int rowNum) throws SQLException {
