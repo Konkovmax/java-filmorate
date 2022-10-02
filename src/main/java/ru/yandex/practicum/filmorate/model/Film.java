@@ -41,6 +41,8 @@ public class Film {
 
     @NotNull
     private Mpa mpa;
+    @NotNull
+    private Director director;
 
     private Director director;
 
