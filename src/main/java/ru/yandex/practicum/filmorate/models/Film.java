@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.models;
+package ru.yandex.practicum.filmorate.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -11,6 +11,7 @@ import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -36,12 +37,10 @@ public class Film {
     @Min(1)
     private int duration;
     private Set<Integer> likes = new HashSet<>();
-    private List<Genre> genres;
+    private List<Genre> genres = new ArrayList<>();
 
     @NotNull
     private Mpa mpa;
-
-    private List<Director> directors;
 
     private Director director;
 
