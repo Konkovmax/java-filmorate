@@ -4,14 +4,17 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.List;
-import java.util.Optional;
+import java.sql.Date;
+import java.util.*;
 
 @Slf4j
 @Component
@@ -26,19 +29,29 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     public Film create(Film film) {
-        String createQuery = "insert into films(Name, DESCRIPTION, DURATION, RELEASEDATE, MPAID) " +
-                "values (?, ?, ?, ?, ?)";
-        jdbcTemplate.update(createQuery,
-                film.getName(),
-                film.getDescription(),
-                film.getDuration(),
-                film.getReleaseDate(),
-                film.getMpa().getId());
-        createQuery = "insert into FILMS_GENRES(genreid, filmid) " +
+        String sqlQuery = "insert into films(Name, DESCRIPTION, DURATION, RELEASEDATE, MPAID, DIRECTORID) " +
+                "values (?, ?, ?, ?, ?, ?)";
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+        jdbcTemplate.update(connection -> {
+            PreparedStatement stmt = connection.prepareStatement(sqlQuery, new String[]{"FILMID"});
+            stmt.setString(1, film.getName());
+            stmt.setString(2, film.getDescription());
+            stmt.setInt(3, film.getDuration());
+            stmt.setDate(4, Date.valueOf(film.getReleaseDate()));
+            stmt.setInt(5, film.getMpa().getId());
+            if (film.getDirector() != null){
+                stmt.setInt(6, film.getDirector().getId());
+            } else {
+                stmt.setNull(6,java.sql.Types.NULL);
+            }
+            return stmt;
+        }, keyHolder);
+        int filmId = keyHolder.getKey().intValue();
+        String createQuery = "insert into FILMS_GENRES(genreid, filmid) " +
                 "                values (?, ?)";
-        film.setId(getFilmIdFromDb(film.getName()));
+        film.setId(filmId);
         for (Genre genre : film.getGenres()) {
-            jdbcTemplate.update(createQuery, genre.getId(), film.getId());
+            jdbcTemplate.update(createQuery, genre.getId(), filmId);
         }
         log.info("Film added");
         return film;
@@ -141,4 +154,43 @@ public class FilmDbStorage implements FilmStorage {
             return 0;
         }
     }
+
+    public List<Film> search(String query, List<String> searchParam) {
+        Set<Film> findBYFilmName = new HashSet<>();
+        Set<Film> findBYDirectorName = new HashSet<>();
+        query = "%" + query.toLowerCase() + "%";
+
+        if (searchParam.contains("title")) {
+            String sqlQuery = "select f.*, r.MPA as mpaName" +
+                    "                 from films f" +
+                    "                 join MPA R on R.MPAID = F.MPAID" +
+                    "                 where lower(f.name) like ?";
+            findBYFilmName = Set.copyOf(jdbcTemplate.query(sqlQuery, this::mapRowToFilm, query));
+        }
+        if (searchParam.contains("director")) {
+            String sqlQuery = "select f.*, r.MPA as mpaName" +
+                    "                 from films f" +
+                    "                 join MPA R on R.MPAID = F.MPAID" +
+                    "                 join DIRECTOR D on D.DIRECTORID = F.DIRECTORID" +
+                    "                 where D.name like ?";
+            findBYDirectorName = Set.copyOf(jdbcTemplate.query(sqlQuery, this::mapRowToFilm,  query));
+        }
+        if (!findBYDirectorName.isEmpty()) {
+            findBYFilmName.addAll(findBYDirectorName);
+        }
+        return List.copyOf(findBYFilmName);
+    }
+
+    public List<Film> getCommonFilms(long userId, long friendId) {
+        String sqlQuery = "select f.*, r.MPA as mpaName" +
+                "                 from films f" +
+                "                 join MPA R on R.MPAID = F.MPAID" +
+                "                 join LIKES L on L.FILMID = F.FILMID" +
+                "                 where L.USERSID = ? AND F.FILMID in (" +
+                "                    SELECT ff.FILMID from films ff" +
+                "                    join LIKES fl on fl.FILMID = FF.FILMID" +
+                "                    WHERE FL.USERSID = ?)";
+        return jdbcTemplate.query(sqlQuery, this::mapRowToFilm, userId, friendId);
+    }
+
 }
