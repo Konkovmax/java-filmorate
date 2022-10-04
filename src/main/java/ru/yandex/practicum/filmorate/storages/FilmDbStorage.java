@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.storage;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -18,11 +19,14 @@ import java.util.Optional;
 public class FilmDbStorage implements FilmStorage {
 
     private final GenreDbStorage genreStorage;
+    private final DirectorDbStorage directorStorage;
     private final JdbcTemplate jdbcTemplate;
 
-    public FilmDbStorage(JdbcTemplate jdbcTemplate, GenreDbStorage genreStorage) {
+    @Autowired
+    public FilmDbStorage(JdbcTemplate jdbcTemplate, GenreDbStorage genreStorage, DirectorDbStorage directorStorage) {
         this.jdbcTemplate = jdbcTemplate;
         this.genreStorage = genreStorage;
+        this.directorStorage = directorStorage;
     }
 
     public Film create(Film film) {
@@ -40,6 +44,9 @@ public class FilmDbStorage implements FilmStorage {
         for (Genre genre : film.getGenres()) {
             jdbcTemplate.update(createQuery, genre.getId(), film.getId());
         }
+        directorStorage.updateDirectorsFromFilm(film);
+
+
         log.info("Film added");
         return film;
     }
@@ -57,6 +64,7 @@ public class FilmDbStorage implements FilmStorage {
             createQuery = "delete from FILMS_GENRES where  filmid = ? ";
             jdbcTemplate.update(createQuery, film.getId());
             String createQuery2 = "insert into FILMS_GENRES(genreid, filmid) values (?, ?)";
+            directorStorage.updateDirectorsFromFilm(film);
             for (Genre genre : film.getGenres()) {
                 try {
                     jdbcTemplate.update(createQuery2, genre.getId(), film.getId());
@@ -128,6 +136,7 @@ public class FilmDbStorage implements FilmStorage {
                 resultSet.getString("mpaName"));
         List<Genre> genres = genreStorage.getFilmsGenre(film.getId());
         film.setGenres(genres);
+        film.setDirectors(directorStorage.getDirectorsFromFilm(film));
         return film;
     }
 

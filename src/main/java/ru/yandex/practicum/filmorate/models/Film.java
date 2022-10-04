@@ -41,8 +41,8 @@ public class Film {
 
     @NotNull
     private Mpa mpa;
-    @NotNull
-    private Director director;
+
+    private List<Director> directors;
 
     private Director director;
 
