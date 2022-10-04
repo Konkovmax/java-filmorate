@@ -2,13 +2,24 @@ package ru.yandex.practicum.filmorate.storage;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.el.stream.Optional;
+import org.springframework.data.repository.query.parser.Part;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Director;
+import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
+
+import javax.lang.model.type.NullType;
+import java.sql.PreparedStatement;
+import java.sql.SQLType;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -34,12 +45,18 @@ public class DirectorDbStorage {
     }
 
     public Director createDirector(Director director) {
+        KeyHolder keyHolder= new GeneratedKeyHolder();
         String sql = "INSERT INTO DIRECTOR(NAME) VALUES (?)";
-        jdbcTemplate.update(sql, director.getName());
-        String sql2 = "SELECT DIRECTORID FROM DIRECTOR ORDER BY DIRECTORID DESC LIMIT 1";
-        int directorId = jdbcTemplate.queryForObject(sql2, int.class);
+        jdbcTemplate.update(connection -> {
+            PreparedStatement stmt=connection.prepareStatement(sql, new String[]{"DIRECTORID"});
+            stmt.setString(1, director.getName());
+            return stmt;
+        },keyHolder);
+
+        int directorId = keyHolder.getKey().intValue();
+        director.setId(directorId);
         log.info("Director added");
-        return getDirector(directorId);
+        return director;
     }
 
     public Director upDateDirector(Director director) {
@@ -54,8 +71,30 @@ public class DirectorDbStorage {
     public void deleteDirector(int directorId) {
         //проверили, существует ли такой режжисер
         getDirector(directorId);
-        String sql = "DELETE FROM DIRECTOR WHERE DIRECTORID=?";
+        //удаляем директора из таблицы фильм-директор
+        String sql = "DELETE FROM FILMS_DIRECTORS WHERE DIRECTORID=?";
         jdbcTemplate.update(sql, directorId);
+        //удаляем директора из таблицы директоров
+        String sql2 = "DELETE FROM DIRECTOR WHERE DIRECTORID=?";
+        jdbcTemplate.update(sql2, directorId);
+    }
+    public List<Director> getDirectorsFromFilm(Film film) {
+        String sql = "SELECT D.DIRECTORID,D.NAME FROM DIRECTOR AS D JOIN FILMS_DIRECTORS AS FD ON D.DIRECTORID=FD.DIRECTORID WHERE FD.FILMID=?";
+        return new ArrayList<>(jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(Director.class), film.getId()));
+    }
+
+    public void updateDirectorsFromFilm(Film film) {
+        List<Director> directors = film.getDirectors();
+        //удаляем старые данные если они есть
+        String sql = "DELETE FROM FILMS_DIRECTORS WHERE FILMID=?";
+        jdbcTemplate.update(sql, film.getId());
+        if (directors != null) {
+            //проверяем есть ли в базе такие директоры
+            directors.forEach(director -> getDirector(director.getId()));
+            //вписываем новых директоров
+            String sql2 = "INSERT INTO FILMS_DIRECTORS(FILMID,DIRECTORID) VALUES (?,?)";
+            directors.forEach(director -> jdbcTemplate.update(sql2, film.getId(), director.getId()));
+        }
     }
 
 }
