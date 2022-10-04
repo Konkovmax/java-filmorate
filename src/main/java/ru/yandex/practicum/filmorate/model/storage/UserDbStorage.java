@@ -3,9 +3,13 @@ package ru.yandex.practicum.filmorate.model.storage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.User;
 
+import java.sql.Date;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
@@ -29,12 +33,17 @@ public class UserDbStorage implements UserStorage {
 
         String createQuery = "insert into users(Name, Login, Birthday, Email) " +
                 "values (?, ?, ?, ?)";
-        jdbcTemplate.update(createQuery,
-                user.getName(),
-                user.getLogin(),
-                user.getBirthday(),
-                user.getEmail());
-        return user;
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+       jdbcTemplate.update(connection -> {
+           PreparedStatement stmt = connection.prepareStatement(createQuery, new String[]{"userid"});
+           stmt.setString(1, user.getName());
+           stmt.setString(2, user.getLogin());
+           stmt.setDate(3, Date.valueOf(user.getBirthday()));
+           stmt.setString(4, user.getEmail());
+           return stmt;
+       }, keyHolder);
+       user.setId(keyHolder.getKey().intValue());
+       return user;
     }
 
 
