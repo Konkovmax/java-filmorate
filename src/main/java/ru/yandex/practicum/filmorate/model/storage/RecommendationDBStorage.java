@@ -43,6 +43,7 @@ public class RecommendationDBStorage {
                 recommendations.add(filmStorage.getFilm(idFilm).get());
             }
         }
+        log.info("Film recommended");
         return recommendations;
     }
 
