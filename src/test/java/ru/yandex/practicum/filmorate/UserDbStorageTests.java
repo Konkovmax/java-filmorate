@@ -6,8 +6,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.jdbc.Sql;
+import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.UserDbStorage;
+import ru.yandex.practicum.filmorate.model.storage.FilmDbStorage;
+import ru.yandex.practicum.filmorate.model.storage.UserDbStorage;
 
 import java.util.List;
 import java.util.Optional;
@@ -22,6 +24,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @Sql("/testdata.sql")
 class UserDbStorageTests {
     private final UserDbStorage userStorage;
+    private final FilmDbStorage filmDbStorage;
 
     @Test
     public void testFindUserById() {
@@ -89,4 +92,5 @@ class UserDbStorageTests {
         userStorage.removeFriend(1, 2);
         assertEquals(1, userStorage.getFriends(1).size());
     }
+
 }

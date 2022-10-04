@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.storage;
+package ru.yandex.practicum.filmorate.model.storage;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -8,8 +8,7 @@ import ru.yandex.practicum.filmorate.model.User;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Slf4j
 @Component
@@ -97,7 +96,7 @@ public class UserDbStorage implements UserStorage {
 
     public List<User> getCommonFriends(int userId, int friendId) {
         String createQuery = "select u.* " +
-                "from friends as f1 " +
+                "from FRIENDS as f1 " +
                 "join friends as f2 on f2.userId = ? " +
                 "and f2.friendId = f1.friendId " +
                 "join users as u on f1.friendId = u.userId " +
@@ -105,6 +104,7 @@ public class UserDbStorage implements UserStorage {
 
         return jdbcTemplate.query(createQuery, this::mapRowToUser, userId, friendId);
     }
+
 
     public void addFriend(int userId, int friendId) {
 

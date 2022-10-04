@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exceptions.BadRequestException;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.UserDbStorage;
+import ru.yandex.practicum.filmorate.model.storage.UserDbStorage;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -104,7 +104,6 @@ public class UserService {
         return userStorage.getCommonFriends(userId, friendId);
     }
 
-
     private boolean throwIfNotValid(User user) throws BadRequestException {
         if (user.getLogin().isEmpty()) {
             log.error("login can't be empty");
@@ -123,6 +122,5 @@ public class UserService {
             throw new BadRequestException("login can't contain spaces");
         }
         return true;
-
     }
 }

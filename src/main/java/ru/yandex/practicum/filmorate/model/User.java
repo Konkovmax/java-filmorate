@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 
@@ -17,6 +18,7 @@ import static ru.yandex.practicum.filmorate.FilmorateApplication.DATE_FORMATTER;
 @AllArgsConstructor
 @RequiredArgsConstructor
 @Validated
+@EqualsAndHashCode(of = "id")
 public class User {
     private int id;
     private String name;

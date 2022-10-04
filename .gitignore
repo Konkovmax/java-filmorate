@@ -41,6 +41,6 @@ build/
 
 ### VS Code ###
 .vscode/
-
+*application.properties
 *.db
 db/*
