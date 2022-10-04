@@ -47,8 +47,7 @@ public class FilmDbStorage implements FilmStorage {
             jdbcTemplate.update(createQuery, genre.getId(), film.getId());
         }
         directorStorage.updateDirectorsFromFilm(film);
-
-
+        film.setDirectors(directorStorage.getDirectorsFromFilm(film));
         log.info("Film added");
         return film;
     }
@@ -67,6 +66,7 @@ public class FilmDbStorage implements FilmStorage {
             jdbcTemplate.update(createQuery, film.getId());
             String createQuery2 = "insert into FILMS_GENRES(genreid, filmid) values (?, ?)";
             directorStorage.updateDirectorsFromFilm(film);
+            film.setDirectors(directorStorage.getDirectorsFromFilm(film));
             for (Genre genre : film.getGenres()) {
                 try {
                     jdbcTemplate.update(createQuery2, genre.getId(), film.getId());
@@ -157,7 +157,7 @@ public class FilmDbStorage implements FilmStorage {
         directorStorage.getDirector(directorId);
         String sql = "SELECT f.*,r.MPA as mpaName FROM FILMS AS F  JOIN FILMS_DIRECTORS AS FD on F.FILMID = FD.FILMID" +
                 " left join mpa R on F.MPAID = R.MPAID Where DIRECTORID=? " +
-                "ORDER BY EXTRACT(YEAR FROM CAST(RELEASEDATE AS DATE) ) DESC";
+                "ORDER BY EXTRACT(YEAR FROM CAST(RELEASEDATE AS DATE) )";
         return new ArrayList<>(jdbcTemplate.query(sql, this::mapRowToFilm, directorId));
     }
 
