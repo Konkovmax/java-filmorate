@@ -11,8 +11,10 @@ import ru.yandex.practicum.filmorate.model.Genre;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -138,6 +140,25 @@ public class FilmDbStorage implements FilmStorage {
         film.setGenres(genres);
         film.setDirectors(directorStorage.getDirectorsFromFilm(film));
         return film;
+    }
+
+    public List<Film> getFilmsDirectorSortedByLike(int directorId) {
+        //проверили, существует ли такой режжисер
+        directorStorage.getDirector(directorId);
+        String sql = "SELECT f.*,r.MPA as mpaName FROM FILMS AS F  JOIN FILMS_DIRECTORS AS FD on F.FILMID = FD.FILMID" +
+                " LEFT JOIN  LIKES L on F.FILMID = L.FILMID left join mpa R on F.MPAID = R.MPAID Where DIRECTORID=?" +
+                " GROUP BY F.FILMID ORDER BY COUNT(USERSID) DESC";
+
+        return new ArrayList<>(jdbcTemplate.query(sql, this::mapRowToFilm, directorId));
+    }
+
+    public List<Film> getFilmsDirectorSortedByYears(int directorId) {
+        //проверили, существует ли такой режжисер
+        directorStorage.getDirector(directorId);
+        String sql = "SELECT f.*,r.MPA as mpaName FROM FILMS AS F  JOIN FILMS_DIRECTORS AS FD on F.FILMID = FD.FILMID" +
+                " left join mpa R on F.MPAID = R.MPAID Where DIRECTORID=? " +
+                "ORDER BY EXTRACT(YEAR FROM CAST(RELEASEDATE AS DATE) ) DESC";
+        return new ArrayList<>(jdbcTemplate.query(sql, this::mapRowToFilm, directorId));
     }
 
     private int getFilmIdFromDb(String name) {
