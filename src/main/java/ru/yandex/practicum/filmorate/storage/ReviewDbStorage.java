@@ -1,13 +1,15 @@
 package ru.yandex.practicum.filmorate.storage;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.model.Review;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
@@ -15,7 +17,7 @@ import java.util.Optional;
 
 @Slf4j
 @Component
-public class ReviewDbStorage implements FilmStorage {
+public class ReviewDbStorage {
 
     private final GenreDbStorage genreStorage;
     private final JdbcTemplate jdbcTemplate;
@@ -25,66 +27,55 @@ public class ReviewDbStorage implements FilmStorage {
         this.genreStorage = genreStorage;
     }
 
-    public Film create(Film film) {
-        String createQuery = "insert into films(Name, DESCRIPTION, DURATION, RELEASEDATE, MPAID) " +
-                "values (?, ?, ?, ?, ?)";
-        jdbcTemplate.update(createQuery,
-                film.getName(),
-                film.getDescription(),
-                film.getDuration(),
-                film.getReleaseDate(),
-                film.getMpa().getId());
-        createQuery = "insert into FILMS_GENRES(genreid, filmid) " +
-                "                values (?, ?)";
-        film.setId(getFilmIdFromDb(film.getName()));
-        for (Genre genre : film.getGenres()) {
-            jdbcTemplate.update(createQuery, genre.getId(), film.getId());
-        }
-        log.info("Film added");
-        return film;
+   public Review create(Review review) {
+        String createQuery = "insert into reviews(Content, isPositive, filmId, userId) " +
+                "values (?, ?, ?, ?)";
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+       jdbcTemplate.update(connection -> {
+           PreparedStatement stmt = connection.prepareStatement(createQuery, new String[]{"REVIEWID"});
+           stmt.setString(1, review.getContent());
+           stmt.setBoolean(2, review.getIsPositive());
+           stmt.setInt(3,  review.getFilmId());
+           stmt.setInt(4, review.getUserId());
+           return stmt;
+       }, keyHolder);
+       int reviewId = keyHolder.getKey().intValue();
+       review.setReviewId(reviewId);
+        log.info("Review added");
+        return review;
     }
 
-    public Optional<Film> update(Film film) {
-        String createQuery = "update films set Name = ?, DESCRIPTION = ?, DURATION = ?, RELEASEDATE = ?, MPAID =? where FILMID = ?";
+    public Optional<Review> update(Review review) {
+        String createQuery = "update reviews set content = ?, ispositive = ?" +
+                //", filmid = ?, userid = ? " +
+                " where reviewID = ?";
         int updateSuccess = jdbcTemplate.update(createQuery,
-                film.getName(),
-                film.getDescription(),
-                film.getDuration(),
-                film.getReleaseDate(),
-                film.getMpa().getId(),
-                film.getId());
+                review.getContent(),
+                review.getIsPositive(),
+//                review.getFilmId(),
+//                review.getUserId(),
+                review.getReviewId());
         if (updateSuccess == 1) {
-            createQuery = "delete from FILMS_GENRES where  filmid = ? ";
-            jdbcTemplate.update(createQuery, film.getId());
-            String createQuery2 = "insert into FILMS_GENRES(genreid, filmid) values (?, ?)";
-            for (Genre genre : film.getGenres()) {
-                try {
-                    jdbcTemplate.update(createQuery2, genre.getId(), film.getId());
-                } catch (DataAccessException e) {
-                    log.warn("Genres update error");
-                }
-            }
-            return Optional.of(film);
+            return Optional.of(review);
         } else {
             return Optional.ofNullable(null);
         }
     }
 
-    public List<Film> findAll() {
-        String createQuery = "select f.*, r.MPA as mpaName" +
-                "                 from films f" +
-                "                 join MPA R on R.MPAID = F.MPAID";
-        return jdbcTemplate.query(createQuery, this::mapRowToFilm);
+    public List<Review> findAllReviews() {
+        String createQuery = "select * " +
+                "                 from reviews";
+        return jdbcTemplate.query(createQuery, this::mapRowToReview);
     }
 
-    public Optional<Film> getFilm(int filmId) {
-        Film film;
-        String createQuery = "select f.*, r.MPA as mpaName" +
-                " from films f" +
-                " join MPA R on R.MPAID = F.MPAID where f.FILMID = ?";
+    public Optional<Review> getReview(int reviewId) {
+        Review review;
+        String createQuery = "select * " +
+                " from reviews" +
+                " where reviewid = ?";
         try {
-            film = jdbcTemplate.queryForObject(createQuery, this::mapRowToFilm, filmId);
-            return Optional.of(film);
+            review = jdbcTemplate.queryForObject(createQuery, this::mapRowToReview, reviewId);
+            return Optional.of(review);
 
         } catch (EmptyResultDataAccessException e) {
             log.warn("film not found");
@@ -92,23 +83,19 @@ public class ReviewDbStorage implements FilmStorage {
         }
     }
 
-    public List<Film> getPopular(int count) {
-        String createQuery = "select f.*, r.MPA as mpaName, count(l.USERSID) " +
-                "from FILMS as f " +
-                " left outer join LIKES as l " +
-                "on f.filmId = l.FILMID " +
-                "join MPA R on R.MPAID = f.MPAID " +
-                "GROUP BY f.FILMID " +
-                "order by count(l.USERSID) desc, f.NAME " +
+    public List<Review> getFilmReviews(int filmId, int count) {
+        String createQuery = "select * " +
+                "from reviews " +
+                " where filmid = ? " +
                 "limit ?";
 
-        return jdbcTemplate.query(createQuery, this::mapRowToFilm, count);
+        return jdbcTemplate.query(createQuery, this::mapRowToReview, filmId, count);
     }
 
-    public void addLike(int filmId, int userId) {
-        String createQuery = "insert into LIKES(filmid, usersid) " +
-                "values (?, ?)";
-        jdbcTemplate.update(createQuery, filmId, userId);
+    public void addReviewReaction(int reviewId, int userId, boolean isLike) {
+        String createQuery = "insert into review_scores(reviewid, userid, islike) " +
+                "values (?, ?, ?)";
+        jdbcTemplate.update(createQuery, reviewId, userId, isLike);
     }
 
     public void removeLike(int filmId, int userId) {
@@ -118,27 +105,40 @@ public class ReviewDbStorage implements FilmStorage {
         log.info("Like removed");
     }
 
-    private Film mapRowToFilm(ResultSet resultSet, int rowNum) throws SQLException {
-        Film film = new Film(Integer.parseInt(resultSet.getString("filmid")),
-                resultSet.getString("name"),
-                resultSet.getString("description"),
-                resultSet.getString("releasedate"),
-                Integer.parseInt(resultSet.getString("duration")),
-                Integer.parseInt(resultSet.getString("mpaid")),
-                resultSet.getString("mpaName"));
-        List<Genre> genres = genreStorage.getFilmsGenre(film.getId());
-        film.setGenres(genres);
-        return film;
+    private Review mapRowToReview(ResultSet resultSet, int rowNum) throws SQLException {
+        Review review = new Review(Integer.parseInt(resultSet.getString("reviewid")),
+                resultSet.getString("content"),
+                resultSet.getBoolean("isPositive"),
+                Integer.parseInt(resultSet.getString("userid")),
+                Integer.parseInt(resultSet.getString("filmid")));
+        review.setUseful(getReviewUseful(review.getReviewId()));
+        return review;
     }
 
-    private int getFilmIdFromDb(String name) {
-        String createQuery = "select f.*, r.mpa as mpaName" +
-                " from films f" +
-                " join mpa R on R.mpaid = F.mpaid where f.name = ?";
-        try {
-            return jdbcTemplate.queryForObject(createQuery, this::mapRowToFilm, name).getId();
-        } catch (EmptyResultDataAccessException e) {
-            return 0;
-        }
+    private int getReviewUseful(int reviewId){
+        int useful = 0;
+        String createQuery = "select count(reviewId) " +
+        "from review_scores " +
+                "where reviewid = ? and islike = ?";
+        useful = jdbcTemplate.queryForObject(createQuery, Integer.class, reviewId, true);
+        useful -= jdbcTemplate.queryForObject(createQuery, Integer.class, reviewId, false);
+
+
+//                "GROUP BY f.FILMID " +
+//                "order by count(l.USERSID) desc, f.NAME " +
+
+
+    return useful;
     }
+
+//    private int getFilmIdFromDb(String name) {
+//        String createQuery = "select f.*, r.mpa as mpaName" +
+//                " from films f" +
+//                " join mpa R on R.mpaid = F.mpaid where f.name = ?";
+//        try {
+//            return jdbcTemplate.queryForObject(createQuery, this::mapRowToFilm, name).getId();
+//        } catch (EmptyResultDataAccessException e) {
+//            return 0;
+//        }
+//    }
 }

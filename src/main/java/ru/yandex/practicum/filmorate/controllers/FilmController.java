@@ -19,37 +19,37 @@ public class FilmController {
         this.filmService = filmService;
     }
 
-    @PostMapping(value = "/reviews")
+    @PostMapping(value = "/films")
     public Film create(@Valid @RequestBody Film film) {
         return filmService.create(film);
     }
 
-    @PutMapping(value = "/reviews")
+    @PutMapping(value = "/films")
     public Film update(@Valid @RequestBody Film film) {
         return filmService.update(film);
     }
 
-    @GetMapping("/reviews")
+    @GetMapping("/films")
     public List<Film> findAll() {
         return filmService.findAll();
     }
 
-    @GetMapping("/reviews/{id}")
+    @GetMapping("/films/{id}")
     public Film getFilm(@PathVariable("id") Integer filmId) {
         return filmService.getFilm(filmId);
     }
 
-    @GetMapping("/reviews/popular")
+    @GetMapping("/films/popular")
     public List<Film> getPopular(@RequestParam(value = "count", defaultValue = "10", required = false) Integer count) {
         return filmService.getPopular(count);
     }
 
-    @PutMapping(value = "/reviews/{id}/like/{userId}")
+    @PutMapping(value = "/films/{id}/like/{userId}")
     public void addLike(@PathVariable("id") Integer filmId, @PathVariable Integer userId) {
         filmService.addLike(filmId, userId);
     }
 
-    @DeleteMapping(value = "/reviews/{id}/like/{userId}")
+    @DeleteMapping(value = "/films/{id}/like/{userId}")
     public void removeLike(@PathVariable("id") Integer filmId, @PathVariable Integer userId) {
         filmService.removeLike(filmId, userId);
     }

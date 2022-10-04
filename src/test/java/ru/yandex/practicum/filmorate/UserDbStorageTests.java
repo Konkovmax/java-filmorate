@@ -18,8 +18,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @SpringBootTest
 @AutoConfigureTestDatabase
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
-@Sql("/testschema.sql")
-@Sql("/testdata.sql")
+@Sql("/testschema.sql1")
+@Sql("/testdata.sql1")
 class UserDbStorageTests {
     private final UserDbStorage userStorage;
 
