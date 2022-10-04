@@ -57,5 +57,4 @@ public class FilmController {
     public void removeLike(@PathVariable("id") Integer filmId, @PathVariable Integer userId) {
         filmService.removeLike(filmId, userId);
     }
-
 }
