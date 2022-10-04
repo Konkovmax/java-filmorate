@@ -1,8 +1,6 @@
 package ru.yandex.practicum.filmorate.storage;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.el.stream.Optional;
-import org.springframework.data.repository.query.parser.Part;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -11,15 +9,11 @@ import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.Genre;
 
-import javax.lang.model.type.NullType;
+
 import java.sql.PreparedStatement;
-import java.sql.SQLType;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -45,13 +39,13 @@ public class DirectorDbStorage {
     }
 
     public Director createDirector(Director director) {
-        KeyHolder keyHolder= new GeneratedKeyHolder();
+        KeyHolder keyHolder = new GeneratedKeyHolder();
         String sql = "INSERT INTO DIRECTOR(NAME) VALUES (?)";
         jdbcTemplate.update(connection -> {
-            PreparedStatement stmt=connection.prepareStatement(sql, new String[]{"DIRECTORID"});
+            PreparedStatement stmt = connection.prepareStatement(sql, new String[]{"DIRECTORID"});
             stmt.setString(1, director.getName());
             return stmt;
-        },keyHolder);
+        }, keyHolder);
 
         int directorId = keyHolder.getKey().intValue();
         director.setId(directorId);
@@ -78,6 +72,7 @@ public class DirectorDbStorage {
         String sql2 = "DELETE FROM DIRECTOR WHERE DIRECTORID=?";
         jdbcTemplate.update(sql2, directorId);
     }
+
     public List<Director> getDirectorsFromFilm(Film film) {
         String sql = "SELECT D.DIRECTORID,D.NAME FROM DIRECTOR AS D JOIN FILMS_DIRECTORS AS FD ON D.DIRECTORID=FD.DIRECTORID WHERE FD.FILMID=?";
         return new ArrayList<>(jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(Director.class), film.getId()));
