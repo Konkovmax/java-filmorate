@@ -38,7 +38,6 @@ public class RecommendationDBStorage {
         List<Integer> filmsId = jdbcTemplate.queryForList(createQueryRecommendation, Integer.class, otherUserId, userId);
         List<Film> recommendations = new ArrayList<>();
         for (int idFilm : filmsId) {
-            System.out.println(idFilm);
             Optional<Film> film = filmStorage.getFilm(idFilm);
             if (film.isPresent()) {
                 recommendations.add(filmStorage.getFilm(idFilm).get());
