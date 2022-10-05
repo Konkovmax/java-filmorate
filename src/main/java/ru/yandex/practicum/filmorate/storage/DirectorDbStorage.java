@@ -29,7 +29,7 @@ public class DirectorDbStorage {
 
     public List<Director> findAllDirectors() {
         String createQuery = "select DIRECTORID AS ID,NAME from DIRECTOR";
-        return new ArrayList<>(jdbcTemplate.query(createQuery, new BeanPropertyRowMapper<>(Director.class)));
+        return jdbcTemplate.query(createQuery, new BeanPropertyRowMapper<>(Director.class));
     }
 
     public Director getDirector(int directorId) {
@@ -77,7 +77,7 @@ public class DirectorDbStorage {
 
     public List<Director> getDirectorsFromFilm(Film film) {
         String sql = "SELECT D.DIRECTORID AS ID,D.NAME FROM DIRECTOR AS D JOIN FILMS_DIRECTORS AS FD ON D.DIRECTORID=FD.DIRECTORID WHERE FD.FILMID=?";
-        return new ArrayList<>(jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(Director.class), film.getId()));
+        return jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(Director.class), film.getId());
     }
 
     public void updateDirectorsFromFilm(Film film) {
