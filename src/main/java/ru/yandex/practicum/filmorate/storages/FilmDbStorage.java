@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
+
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
@@ -16,11 +17,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import java.sql.Date;
-import java.util.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
+
 
 @Slf4j
 @Component
@@ -154,7 +154,7 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     public List<Film> getFilmsDirectorSortedByLike(int directorId) {
-        //РїСЂРѕРІРµСЂРёР»Рё, СЃСѓС‰РµСЃС‚РІСѓРµС‚ Р»Рё С‚Р°РєРѕР№ СЂРµР¶Р¶РёСЃРµСЂ
+        //проверили, существует ли такой режжисер
         directorStorage.getDirector(directorId);
         String sql = "SELECT f.*,r.MPA as mpaName FROM FILMS AS F  JOIN FILMS_DIRECTORS AS FD on F.FILMID = FD.FILMID" +
                 " LEFT JOIN  LIKES L on F.FILMID = L.FILMID left join mpa R on F.MPAID = R.MPAID Where DIRECTORID=?" +
@@ -164,7 +164,7 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     public List<Film> getFilmsDirectorSortedByYears(int directorId) {
-        //РїСЂРѕРІРµСЂРёР»Рё, СЃСѓС‰РµСЃС‚РІСѓРµС‚ Р»Рё С‚Р°РєРѕР№ СЂРµР¶Р¶РёСЃРµСЂ
+        //проверили, существует ли такой режжисер
         directorStorage.getDirector(directorId);
         String sql = "SELECT f.*,r.MPA as mpaName FROM FILMS AS F  JOIN FILMS_DIRECTORS AS FD on F.FILMID = FD.FILMID" +
                 " left join mpa R on F.MPAID = R.MPAID Where DIRECTORID=? " +
@@ -181,6 +181,40 @@ public class FilmDbStorage implements FilmStorage {
         } catch (EmptyResultDataAccessException e) {
             return 0;
         }
+    }
+
+    public List<Film> search(String query, List<String> searchParam) {
+        List<Film> searchResultList = new ArrayList<>();
+        query = "%" + query.toLowerCase() + "%";
+        if (searchParam.contains("director")) {
+            searchResultList = searchByDirector(query);
+        }
+        if (searchParam.contains("title")) {
+            if (searchResultList.isEmpty()) {
+                searchResultList = searchByTitle(query);
+            } else {
+                searchResultList.addAll(searchByTitle(query));
+            }
+        }
+        return searchResultList;
+    }
+
+    private List<Film> searchByTitle(String query) {
+        String sqlQuery = "(select f.*, r.MPA as mpaName" +
+                "                 from films f" +
+                "                 join MPA R on R.MPAID = F.MPAID" +
+                "                 where lower(f.name) like ?)";
+        return jdbcTemplate.query(sqlQuery, this::mapRowToFilm, query);
+    }
+
+    private List<Film> searchByDirector(String query) {
+        String sqlQuery = "(select f.*, r.MPA as mpaName" +
+                "                 from films f" +
+                "                 join MPA R on R.MPAID = F.MPAID" +
+                "                 join FILMS_DIRECTORS FD on FD.FILMID = F.FILMID" +
+                "                 join DIRECTOR D on D.DIRECTORID = FD.DIRECTORID" +
+                "                 where lower(D.name) like ?)";
+        return jdbcTemplate.query(sqlQuery, this::mapRowToFilm, query);
     }
 
     public List<Film> getCommonFilms(long userId, long friendId) {
