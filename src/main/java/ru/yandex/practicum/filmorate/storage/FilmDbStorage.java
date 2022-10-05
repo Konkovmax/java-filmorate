@@ -38,8 +38,8 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     public Film create(Film film) {
-        String sqlQuery = "insert into films(Name, DESCRIPTION, DURATION, RELEASEDATE, MPAID, DIRECTORID) " +
-                "values (?, ?, ?, ?, ?, ?)";
+        String sqlQuery = "insert into films(Name, DESCRIPTION, DURATION, RELEASEDATE, MPAID) " +
+                "values (?, ?, ?, ?, ?)";
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(connection -> {
             PreparedStatement stmt = connection.prepareStatement(sqlQuery, new String[]{"FILMID"});
@@ -48,11 +48,6 @@ public class FilmDbStorage implements FilmStorage {
             stmt.setInt(3, film.getDuration());
             stmt.setDate(4, Date.valueOf(film.getReleaseDate()));
             stmt.setInt(5, film.getMpa().getId());
-            if (film.getDirector() != null){
-                stmt.setInt(6, film.getDirector().getId());
-            } else {
-                stmt.setNull(6,java.sql.Types.NULL);
-            }
             return stmt;
         }, keyHolder);
         int filmId = keyHolder.getKey().intValue();
