@@ -8,11 +8,11 @@ import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Review;
 import ru.yandex.practicum.filmorate.storage.FilmDbStorage;
 import ru.yandex.practicum.filmorate.storage.ReviewDbStorage;
-import ru.yandex.practicum.filmorate.storage.ReviewDbStorage;
 import ru.yandex.practicum.filmorate.storage.UserDbStorage;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -30,16 +30,16 @@ public class ReviewService {
 
     }
 
-    public Review create(Review review){
-        if (review.getUserId()==0) {
+    public Review create(Review review) {
+        if (review.getUserId() == 0) {
             log.error("user can't be empty");
             throw new BadRequestException("user can't be empty");
         }
-        if (review.getFilmId()==0) {
+        if (review.getFilmId() == 0) {
             log.error("film can't be empty");
             throw new BadRequestException("film can't be empty");
         }
-        if (review.getIsPositive()==null) {
+        if (review.getIsPositive() == null) {
             log.error("score can't be empty");
             throw new BadRequestException("score can't be empty");
         }
@@ -54,11 +54,11 @@ public class ReviewService {
                     "Film with id: %s not found",
                     review.getFilmId()));
         } else {
-        return reviewStorage.create(review);
+            return reviewStorage.create(review);
         }
     }
 
-   public Review update(Review review) {
+    public Review update(Review review) {
         if (reviewStorage.update(review).isPresent()) {
             log.info("Review updated");
             return reviewStorage.update(review).get();
@@ -69,10 +69,6 @@ public class ReviewService {
                     review.getReviewId()));
         }
     }
-
-//    public List<Review> findAll() {
-//        return reviewStorage.findAll();
-//    }
 
     public Review getReview(int reviewId) {
         if (reviewStorage.getReview(reviewId).isPresent()) {
@@ -87,22 +83,37 @@ public class ReviewService {
         reviewStorage.addReviewReaction(reviewId, userId, isLike);
     }
 
-    public void removeLike(int reviewId, int userId) {
+    public void removeReviewReaction(int reviewId, int userId, boolean isLike) {
         if (userStorage.userExistCheck(userId) == 0) {
             log.warn("User not found");
             throw new NotFoundException(String.format(
                     "User with id: %s not found",
                     userId));
         } else {
-            reviewStorage.removeLike(reviewId, userId);
+            reviewStorage.removeReviewReaction(reviewId, userId, isLike);
         }
     }
 
+    private Comparator<Review> comparator = Comparator.comparingInt(Review::getUseful).reversed();
+
     public List<Review> getAllReviews(int filmId, int count) {
-        if(filmId==0){
-            return reviewStorage.findAllReviews();
-        }else {
-            return reviewStorage.getFilmReviews(filmId, count);
+        if (filmId == 0) {
+            List<Review> reviews = reviewStorage.findAllReviews();
+            Collections.sort(reviews, comparator);
+            return reviews;
+        } else {
+            List<Review> reviews = reviewStorage.getFilmReviews(filmId, count);
+            Collections.sort(reviews, comparator);
+            return reviews;
+        }
+    }
+
+    public void removeReview(int reviewId) {
+        if (reviewStorage.getReview(reviewId).isEmpty()) {
+            throw new NotFoundException(String.format(
+                    "Review with id: %s not found", reviewId));
+        } else {
+            reviewStorage.removeReview(reviewId);
         }
     }
 }

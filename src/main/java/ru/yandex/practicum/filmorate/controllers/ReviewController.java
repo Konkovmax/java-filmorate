@@ -3,7 +3,6 @@ package ru.yandex.practicum.filmorate.controllers;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Review;
 import ru.yandex.practicum.filmorate.service.ReviewService;
 
@@ -25,15 +24,15 @@ public class ReviewController {
         return reviewService.create(review);
     }
 
-   @PutMapping(value = "/reviews")
+    @PutMapping(value = "/reviews")
     public Review update(@Valid @RequestBody Review review) {
         return reviewService.update(review);
     }
 
-//    @DeleteMapping("/reviews/{id}")
-//    public void removeReview(@PathVariable("id") Integer reviewId) {
-//        reviewService.removeReview(reviewId);
-//    }
+    @DeleteMapping("/reviews/{id}")
+    public void removeReview(@PathVariable("id") Integer reviewId) {
+        reviewService.removeReview(reviewId);
+    }
 
     @GetMapping("/reviews/{id}")
     public Review getReview(@PathVariable("id") Integer reviewId) {
@@ -42,8 +41,8 @@ public class ReviewController {
 
     @GetMapping("/reviews")
     public List<Review> getAllReviews(@RequestParam(value = "filmId", defaultValue = "0", required = false) Integer filmId,
-        @RequestParam(value = "count", defaultValue = "10", required = false) Integer count) {
-            return reviewService.getAllReviews(filmId,count);
+                                      @RequestParam(value = "count", defaultValue = "10", required = false) Integer count) {
+        return reviewService.getAllReviews(filmId, count);
     }
 
     @PutMapping(value = "/reviews/{id}/like/{userId}")
@@ -53,7 +52,7 @@ public class ReviewController {
 
     @DeleteMapping(value = "/reviews/{id}/like/{userId}")
     public void removeReviewLike(@PathVariable("id") Integer reviewId, @PathVariable Integer userId) {
-        reviewService.removeLike(reviewId, userId);
+        reviewService.removeReviewReaction(reviewId, userId, true);
     }
 
     @PutMapping(value = "/reviews/{id}/dislike/{userId}")
@@ -63,7 +62,7 @@ public class ReviewController {
 
     @DeleteMapping(value = "/reviews/{id}/dislike/{userId}")
     public void removeReviewDislike(@PathVariable("id") Integer reviewId, @PathVariable Integer userId) {
-        reviewService.removeLike(reviewId, userId);
+        reviewService.removeReviewReaction(reviewId, userId, false);
     }
 
 }
