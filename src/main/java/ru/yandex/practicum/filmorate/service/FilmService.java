@@ -77,12 +77,6 @@ public class FilmService {
         return filmStorage.getPopular(count);
     }
 
-    public List<Film> search(String query, String params) {
-        String [] items = params.split(",");
-        List<String> searchParam = Arrays.asList(items);
-        return getSortedFilms(filmStorage.search(query, searchParam));
-    }
-
     public List<Film> getCommonFilms(Long userId, Long friendId) {
         return getSortedFilms(filmStorage.getCommonFilms(userId, friendId));
     }
@@ -97,4 +91,11 @@ public class FilmService {
 
     }
 
+    public List<Film> getFilmsDirectorSortedByLike(int directorId) {
+        return filmStorage.getFilmsDirectorSortedByLike(directorId);
+    }
+
+    public List<Film> getFilmsDirectorSortedByYears(int directorId) {
+        return filmStorage.getFilmsDirectorSortedByYears(directorId);
+    }
 }

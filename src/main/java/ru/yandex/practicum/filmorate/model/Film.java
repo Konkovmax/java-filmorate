@@ -42,7 +42,7 @@ public class Film {
     @NotNull
     private Mpa mpa;
 
-    private Director director;
+    private List<Director> directors;
 
     public Film(int id, String name, String description, String releaseDate, int duration, int ratingId, String ratingName) {
         this.id = id;
