@@ -44,6 +44,14 @@ public class FilmService {
         }
     }
 
+    public void delete(int filmId) {
+        var deletedFilm = filmStorage.delete(filmId);
+        if (!deletedFilm) {
+            throw new NotFoundException(String.format(
+                    "Film with id: %s not found", filmId));
+        }
+    }
+
     public List<Film> findAll() {
         return filmStorage.findAll();
     }

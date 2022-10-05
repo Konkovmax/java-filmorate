@@ -92,6 +92,19 @@ public class FilmDbStorage implements FilmStorage {
         }
     }
 
+    public boolean delete(int filmId) {
+        String createQuery = "delete from FILMS where filmid = ?";
+        var filmToDelete = this.getFilm(filmId);
+        if (filmToDelete.isPresent()) {
+            jdbcTemplate.update(createQuery, filmId);
+            return true;
+        }
+        else {
+            log.warn("user not found");
+            return false;
+        }
+    }
+
     public List<Film> getPopular(int count) {
         String createQuery = "select f.*, r.MPA as mpaName, count(l.USERSID) " +
                 "from FILMS as f " +
