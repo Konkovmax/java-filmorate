@@ -14,5 +14,7 @@ public interface FilmStorage {
     Optional<Film> update(Film film);
 
     List<Film> getCommonFilms(long userId, long friendId);
+
+    List<Film> search(String query, List<String> searchParam);
 }
 
