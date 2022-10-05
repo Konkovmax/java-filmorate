@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.storage;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -10,19 +11,24 @@ import ru.yandex.practicum.filmorate.model.Genre;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component
 public class FilmDbStorage implements FilmStorage {
 
     private final GenreDbStorage genreStorage;
+    private final DirectorDbStorage directorStorage;
     private final JdbcTemplate jdbcTemplate;
 
-    public FilmDbStorage(JdbcTemplate jdbcTemplate, GenreDbStorage genreStorage) {
+    @Autowired
+    public FilmDbStorage(JdbcTemplate jdbcTemplate, GenreDbStorage genreStorage, DirectorDbStorage directorStorage) {
         this.jdbcTemplate = jdbcTemplate;
         this.genreStorage = genreStorage;
+        this.directorStorage = directorStorage;
     }
 
     public Film create(Film film) {
@@ -40,6 +46,8 @@ public class FilmDbStorage implements FilmStorage {
         for (Genre genre : film.getGenres()) {
             jdbcTemplate.update(createQuery, genre.getId(), film.getId());
         }
+        directorStorage.updateDirectorsFromFilm(film);
+        film.setDirectors(directorStorage.getDirectorsFromFilm(film));
         log.info("Film added");
         return film;
     }
@@ -57,6 +65,8 @@ public class FilmDbStorage implements FilmStorage {
             createQuery = "delete from FILMS_GENRES where  filmid = ? ";
             jdbcTemplate.update(createQuery, film.getId());
             String createQuery2 = "insert into FILMS_GENRES(genreid, filmid) values (?, ?)";
+            directorStorage.updateDirectorsFromFilm(film);
+            film.setDirectors(directorStorage.getDirectorsFromFilm(film));
             for (Genre genre : film.getGenres()) {
                 try {
                     jdbcTemplate.update(createQuery2, genre.getId(), film.getId());
@@ -128,7 +138,27 @@ public class FilmDbStorage implements FilmStorage {
                 resultSet.getString("mpaName"));
         List<Genre> genres = genreStorage.getFilmsGenre(film.getId());
         film.setGenres(genres);
+        film.setDirectors(directorStorage.getDirectorsFromFilm(film));
         return film;
+    }
+
+    public List<Film> getFilmsDirectorSortedByLike(int directorId) {
+        //проверили, существует ли такой режжисер
+        directorStorage.getDirector(directorId);
+        String sql = "SELECT f.*,r.MPA as mpaName FROM FILMS AS F  JOIN FILMS_DIRECTORS AS FD on F.FILMID = FD.FILMID" +
+                " LEFT JOIN  LIKES L on F.FILMID = L.FILMID left join mpa R on F.MPAID = R.MPAID Where DIRECTORID=?" +
+                " GROUP BY F.FILMID ORDER BY COUNT(USERSID) DESC";
+
+        return new ArrayList<>(jdbcTemplate.query(sql, this::mapRowToFilm, directorId));
+    }
+
+    public List<Film> getFilmsDirectorSortedByYears(int directorId) {
+        //проверили, существует ли такой режжисер
+        directorStorage.getDirector(directorId);
+        String sql = "SELECT f.*,r.MPA as mpaName FROM FILMS AS F  JOIN FILMS_DIRECTORS AS FD on F.FILMID = FD.FILMID" +
+                " left join mpa R on F.MPAID = R.MPAID Where DIRECTORID=? " +
+                "ORDER BY EXTRACT(YEAR FROM CAST(RELEASEDATE AS DATE) )";
+        return new ArrayList<>(jdbcTemplate.query(sql, this::mapRowToFilm, directorId));
     }
 
     private int getFilmIdFromDb(String name) {
