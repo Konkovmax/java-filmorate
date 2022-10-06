@@ -15,7 +15,6 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class RecommendationDBStorage {
 
-
     private final JdbcTemplate jdbcTemplate;
     private final FilmDbStorage filmStorage;
 
