@@ -2,7 +2,6 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exceptions.BadRequestException;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
@@ -90,14 +89,14 @@ public class ReviewService {
     private Comparator<Review> comparator = Comparator.comparingInt(Review::getUseful).reversed();
 
     public List<Review> getAllReviews(int filmId, int count) {
-            List<Review> reviews;
+        List<Review> reviews;
         if (filmId == 0) {
             reviews = reviewStorage.findAllReviews();
         } else {
             reviews = reviewStorage.getFilmReviews(filmId, count);
         }
-            Collections.sort(reviews, comparator);
-            return reviews;
+        Collections.sort(reviews, comparator);
+        return reviews;
     }
 
     public void removeReview(int reviewId) {
