@@ -243,33 +243,36 @@ public class FilmDbStorage implements FilmStorage {
         log.info("Popular Film By Year has found");
         return film;
     }
-
-    public List<Film> getPopular(Integer count) {
-        System.out.println("популярный фильм");
+    public List<Film> getPopular(int count) {
         String createQuery = "select f.*, r.MPA as mpaName, count(l.USERSID) " +
                 "from FILMS as f " +
                 " left outer join LIKES as l " +
                 "on f.filmId = l.FILMID " +
                 "join MPA R on R.MPAID = f.MPAID " +
-                "JOIN FILMS_GENRES FG on f.FILMID = FG.FILMID " +
                 "GROUP BY f.FILMID " +
                 "order by count(l.USERSID) desc, f.NAME " +
                 "limit ?";
 
+        return jdbcTemplate.query(createQuery, this::mapRowToFilm, count);
+    }
 
-      //  String createQuery = "select f.*, r.MPA as mpaName, count(l.USERSID) " +
+//    public List<Film> getPopular(Integer count) {
+//        String createQuery = "select f.*, r.MPA as mpaName, count(l.USERSID) " +
 //                "from FILMS as f " +
 //                " left outer join LIKES as l " +
 //                "on f.filmId = l.FILMID " +
 //                "join MPA R on R.MPAID = f.MPAID " +
+//                "JOIN FILMS_GENRES FG on f.FILMID = FG.FILMID " +
 //                "GROUP BY f.FILMID " +
 //                "order by count(l.USERSID) desc, f.NAME " +
 //                "limit ?";
-
-        List<Film> film = jdbcTemplate.query(createQuery, this::mapRowToFilm, count);
-        log.info("Popular Film has found");
-        return film;
-    }
+//
+//
+//
+//        List<Film> film = jdbcTemplate.query(createQuery, this::mapRowToFilm, count);
+//        log.info("Popular Film has found");
+//        return film;
+//    }
 
 }
 
