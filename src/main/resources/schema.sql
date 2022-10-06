@@ -1,13 +1,14 @@
-DROP TABLE LIKES if exists;
-DROP TABLE FRIENDS if exists;
-DROP TABLE FILMS_GENRES if exists;
-DROP TABLE GENRES if exists;
-DROP TABLE FILMS_DIRECTORS if exists;
-drop table FILMS if exists;
-drop table DIRECTOR if exists;
-DROP TABLE RATINGS if exists;
-DROP TABLE MPA if exists;
-DROP TABLE USERS if exists;
+DROP TABLE if exists LIKES;
+DROP TABLE if exists FRIENDS;
+DROP TABLE if exists FILMS_GENRES;
+DROP TABLE if exists GENRES;
+DROP TABLE if exists FILMS_DIRECTORS;
+drop table if exists FILMS;
+drop table if exists DIRECTOR;
+DROP TABLE if exists RATINGS;
+DROP TABLE if exists MPA;
+DROP TABLE if exists USERS;
+
 CREATE TABLE IF NOT EXISTS "USERS"
 (
     "USERID"   INT     NOT NULL AUTO_INCREMENT,
