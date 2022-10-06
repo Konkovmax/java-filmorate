@@ -1,17 +1,26 @@
 package ru.yandex.practicum.filmorate.storage;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+
+import java.sql.Date;
+import java.util.*;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -20,25 +29,31 @@ public class FilmDbStorage implements FilmStorage {
     private final GenreDbStorage genreStorage;
     private final JdbcTemplate jdbcTemplate;
 
+    @Autowired
     public FilmDbStorage(JdbcTemplate jdbcTemplate, GenreDbStorage genreStorage) {
         this.jdbcTemplate = jdbcTemplate;
         this.genreStorage = genreStorage;
     }
 
     public Film create(Film film) {
-        String createQuery = "insert into films(Name, DESCRIPTION, DURATION, RELEASEDATE, MPAID) " +
+        String sqlQuery = "insert into films(Name, DESCRIPTION, DURATION, RELEASEDATE, MPAID) " +
                 "values (?, ?, ?, ?, ?)";
-        jdbcTemplate.update(createQuery,
-                film.getName(),
-                film.getDescription(),
-                film.getDuration(),
-                film.getReleaseDate(),
-                film.getMpa().getId());
-        createQuery = "insert into FILMS_GENRES(genreid, filmid) " +
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+        jdbcTemplate.update(connection -> {
+            PreparedStatement stmt = connection.prepareStatement(sqlQuery, new String[]{"FILMID"});
+            stmt.setString(1, film.getName());
+            stmt.setString(2, film.getDescription());
+            stmt.setInt(3, film.getDuration());
+            stmt.setDate(4, Date.valueOf(film.getReleaseDate()));
+            stmt.setInt(5, film.getMpa().getId());
+            return stmt;
+        }, keyHolder);
+        int filmId = keyHolder.getKey().intValue();
+        String createQuery = "insert into FILMS_GENRES(genreid, filmid) " +
                 "                values (?, ?)";
-        film.setId(getFilmIdFromDb(film.getName()));
+        film.setId(filmId);
         for (Genre genre : film.getGenres()) {
-            jdbcTemplate.update(createQuery, genre.getId(), film.getId());
+            jdbcTemplate.update(createQuery, genre.getId(), filmId);
         }
         log.info("Film added");
         return film;
@@ -153,5 +168,17 @@ public class FilmDbStorage implements FilmStorage {
         } catch (EmptyResultDataAccessException e) {
             return 0;
         }
+    }
+
+    public List<Film> getCommonFilms(long userId, long friendId) {
+        String sqlQuery = "select f.*, r.MPA as mpaName" +
+                "                 from films f" +
+                "                 join MPA R on R.MPAID = F.MPAID" +
+                "                 join LIKES L on L.FILMID = F.FILMID" +
+                "                 where L.USERSID = ? AND F.FILMID in (" +
+                "                    SELECT ff.FILMID from films ff" +
+                "                    join LIKES fl on fl.FILMID = FF.FILMID" +
+                "                    WHERE FL.USERSID = ?)";
+        return jdbcTemplate.query(sqlQuery, this::mapRowToFilm, userId, friendId);
     }
 }
