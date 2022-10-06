@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.service;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -16,19 +17,11 @@ import java.util.List;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class ReviewService {
     private final ReviewDbStorage reviewStorage;
     private final UserDbStorage userStorage;
     private final FilmDbStorage filmStorage;
-
-
-    @Autowired
-    public ReviewService(ReviewDbStorage reviewStorage, UserDbStorage userStorage, FilmDbStorage filmStorage) {
-        this.reviewStorage = reviewStorage;
-        this.userStorage = userStorage;
-        this.filmStorage = filmStorage;
-
-    }
 
     public Review create(Review review) {
         if (review.getUserId() == 0) {
@@ -97,15 +90,14 @@ public class ReviewService {
     private Comparator<Review> comparator = Comparator.comparingInt(Review::getUseful).reversed();
 
     public List<Review> getAllReviews(int filmId, int count) {
+            List<Review> reviews;
         if (filmId == 0) {
-            List<Review> reviews = reviewStorage.findAllReviews();
-            Collections.sort(reviews, comparator);
-            return reviews;
+            reviews = reviewStorage.findAllReviews();
         } else {
-            List<Review> reviews = reviewStorage.getFilmReviews(filmId, count);
+            reviews = reviewStorage.getFilmReviews(filmId, count);
+        }
             Collections.sort(reviews, comparator);
             return reviews;
-        }
     }
 
     public void removeReview(int reviewId) {
