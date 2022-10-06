@@ -104,21 +104,23 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     public Optional<Film> getFilm(int filmId) {
-        if(filmId<0){
-            throw new NotFoundException("film not found");
-        }
-        Film film;
         String createQuery = "select f.*, R.MPA as mpaName " +
                 "from FILMS f " +
                 "join MPA R on R.MPAID = F.MPAID where f.FILMID = ?";
-        try {
-            film = jdbcTemplate.query(createQuery, this::mapRowToFilm, filmId).get(0);
-            return Optional.of(film);
-
-        } catch (EmptyResultDataAccessException e) {
-            log.warn("film not found");
-            return Optional.ofNullable(null);
+        final List<Film> films = jdbcTemplate.query(createQuery, this::mapRowToFilm, filmId);
+        if (films.size() != 1) {
+            throw new NotFoundException("Фильм с id " + filmId + " не найден");
         }
+        return Optional.of(films.get(0));
+
+//        try {
+//            film = jdbcTemplate.query(createQuery, this::mapRowToFilm, filmId).get(0);
+//            return Optional.of(film);
+//
+//        } catch (EmptyResultDataAccessException e) {
+//            log.warn("film not found");
+//            return Optional.ofNullable(null);
+//        }
     }
 
     public boolean delete(int filmId) {
