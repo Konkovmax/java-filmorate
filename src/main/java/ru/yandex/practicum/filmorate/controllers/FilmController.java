@@ -30,6 +30,9 @@ public class FilmController {
         return filmService.update(film);
     }
 
+    @DeleteMapping(value = "/films/{id}")
+    public void delete(@PathVariable("id") Integer filmId) { filmService.delete(filmId); }
+
     @GetMapping("/films")
     public List<Film> findAll() {
         return filmService.findAll();

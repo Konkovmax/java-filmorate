@@ -13,6 +13,8 @@ public interface FilmStorage {
 
     Optional<Film> update(Film film);
 
+    boolean delete(int filmId);
+
     List<Film> getCommonFilms(long userId, long friendId);
 }
 
