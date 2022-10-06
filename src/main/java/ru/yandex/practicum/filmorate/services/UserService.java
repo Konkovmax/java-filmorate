@@ -1,14 +1,12 @@
-package ru.yandex.practicum.filmorate.services;
+package ru.yandex.practicum.filmorate.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exceptions.BadRequestException;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
-import ru.yandex.practicum.filmorate.models.Event;
-import ru.yandex.practicum.filmorate.models.User;
-import ru.yandex.practicum.filmorate.storages.EventDbStorage;
-import ru.yandex.practicum.filmorate.storages.UserDbStorage;
+import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.UserDbStorage;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -17,12 +15,10 @@ import java.util.List;
 @Service
 public class UserService {
     private final UserDbStorage userStorage;
-    private final EventDbStorage eventStorage;
 
     @Autowired
-    public UserService(UserDbStorage userStorage, EventDbStorage eventStorage) {
+    public UserService(UserDbStorage userStorage) {
         this.userStorage = userStorage;
-        this.eventStorage = eventStorage;
     }
 
     public List<User> findAll() {
@@ -66,8 +62,11 @@ public class UserService {
     }
 
     public void delete(int userId) {
-        userStorage.delete(userId);
-
+        boolean deletedUser = userStorage.delete(userId);
+        if (!deletedUser) {
+            throw new NotFoundException(String.format(
+                    "User with id: %s not found", userId));
+        }
     }
 
     public void addFriend(int userId, int friendId) {
@@ -84,9 +83,6 @@ public class UserService {
                     friendId));
         } else {
             userStorage.addFriend(userId, friendId);
-            Event friendEvent = new Event(userId, "FRIEND", "ADD");
-            friendEvent.setEntityId(friendId);
-            eventStorage.addEvent(friendEvent);
         }
     }
 
@@ -97,9 +93,6 @@ public class UserService {
                     "Friends of User with id: %s not found", userId));
         } else {
             userStorage.removeFriend(userId, friendId);
-            Event friendEvent = new Event(userId, "FRIEND", "REMOVE");
-            friendEvent.setEntityId(friendId);
-            eventStorage.addEvent(friendEvent);
         }
     }
 

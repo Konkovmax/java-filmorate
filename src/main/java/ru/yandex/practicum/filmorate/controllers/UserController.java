@@ -3,10 +3,8 @@ package ru.yandex.practicum.filmorate.controllers;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.models.Film;
-import ru.yandex.practicum.filmorate.models.User;
-import ru.yandex.practicum.filmorate.services.RecommendationService;
-import ru.yandex.practicum.filmorate.services.UserService;
+import ru.yandex.practicum.filmorate.service.UserService;
+import ru.yandex.practicum.filmorate.model.User;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -15,12 +13,10 @@ import java.util.List;
 @RestController
 public class UserController {
     private final UserService userService;
-    private final RecommendationService recommendationService;
 
     @Autowired
-    public UserController(UserService userService, RecommendationService recommendationService) {
+    public UserController(UserService userService) {
         this.userService = userService;
-        this.recommendationService = recommendationService;
     }
 
     @GetMapping("/users")
@@ -55,9 +51,7 @@ public class UserController {
     }
 
     @DeleteMapping(value = "/users/{id}")
-    public void delete(@PathVariable("id") Integer userId) {
-        userService.delete(userId);
-    }
+    public void delete(@PathVariable("id") Integer userId) { userService.delete(userId); }
 
 
     @PutMapping(value = "/users/{id}/friends/{friendId}")
@@ -71,8 +65,4 @@ public class UserController {
         userService.removeFriend(userId, friendId);
     }
 
-    @GetMapping("/users/{id}/recommendations")
-    public List<Film> recommendations(@PathVariable("id") Integer userId) {
-        return recommendationService.recommendations(userId);
-    }
 }

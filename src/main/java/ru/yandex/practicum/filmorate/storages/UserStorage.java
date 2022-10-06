@@ -1,6 +1,6 @@
-package ru.yandex.practicum.filmorate.storages;
+package ru.yandex.practicum.filmorate.storage;
 
-import ru.yandex.practicum.filmorate.models.User;
+import ru.yandex.practicum.filmorate.model.User;
 
 import java.util.List;
 import java.util.Optional;
@@ -15,7 +15,7 @@ public interface UserStorage {
 
     Optional<User> getUser(int userId);
 
-    void delete(int userId);
+    boolean delete(int userId);
 
     void addFriend(int userId, int friendId);
 

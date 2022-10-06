@@ -1,11 +1,10 @@
-package ru.yandex.practicum.filmorate.storages;
+package ru.yandex.practicum.filmorate.storage;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
-import ru.yandex.practicum.filmorate.models.User;
+import ru.yandex.practicum.filmorate.model.User;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -23,14 +22,14 @@ public class UserDbStorage implements UserStorage {
     }
 
     public List<User> findAll() {
-        String createQuery = "SELECT * FROM users";
+        String createQuery = "select * from users";
         return jdbcTemplate.query(createQuery, this::mapRowToUser);
     }
 
     public User create(User user) {
 
-        String createQuery = "INSERT INTO users(name, login, birthday, email) " +
-                "VALUES (?, ?, ?, ?)";
+        String createQuery = "insert into users(Name, Login, Birthday, Email) " +
+                "values (?, ?, ?, ?)";
         jdbcTemplate.update(createQuery,
                 user.getName(),
                 user.getLogin(),
@@ -41,7 +40,7 @@ public class UserDbStorage implements UserStorage {
 
 
     public Optional<User> update(User user) {
-        String createQuery = "UPDATE users SET name = ?, login = ?, birthday = ?, email = ? WHERE userid = ?";
+        String createQuery = "update users set Name = ?, Login = ?, Birthday = ?, Email = ? where UserID = ?";
         int updateSuccess = jdbcTemplate.update(createQuery,
                 user.getName(),
                 user.getLogin(),
@@ -61,7 +60,7 @@ public class UserDbStorage implements UserStorage {
     public Optional<User> getUser(int userId) {
 
         try {
-            String createQuery = "SELECT * FROM users WHERE userid = ?";
+            String createQuery = "select * from USERS where userid = ?";
             return Optional.of(jdbcTemplate.queryForObject(createQuery, this::mapRowToUser, userId));
         } catch (EmptyResultDataAccessException e) {
             log.warn("user not found");
@@ -70,15 +69,16 @@ public class UserDbStorage implements UserStorage {
 
     }
 
-    public void delete(int userId) {
-        String createQuery = "DELETE FROM users WHERE userid = ?";
+    public boolean delete(int userId) {
+        String createQuery = "delete from USERS where userid = ?";
         var userToDelete = this.getUser(userId);
         if (userToDelete.isPresent()) {
             jdbcTemplate.update(createQuery, userId);
-        } else {
+            return true;
+        }
+        else {
             log.warn("user not found");
-            throw new NotFoundException(String.format(
-                    "User with id: %s not found", userId));
+            return false;
         }
     }
 
@@ -91,7 +91,7 @@ public class UserDbStorage implements UserStorage {
     }
 
     public int getUserIdFromDb(String login) {
-        String createQuery = "SELECT * FROM users WHERE login = ?";
+        String createQuery = "select * from USERS where login = ?";
         try {
             return jdbcTemplate.queryForObject(createQuery, this::mapRowToUser, login).getId();
         } catch (EmptyResultDataAccessException e) {
@@ -100,7 +100,7 @@ public class UserDbStorage implements UserStorage {
     }
 
     public int userExistCheck(int id) {
-        String createQuery = "SELECT * FROM users WHERE userid = ?";
+        String createQuery = "select * from USERS where userid = ?";
         try {
             return jdbcTemplate.queryForObject(createQuery, this::mapRowToUser, id).getId();
         } catch (EmptyResultDataAccessException e) {
@@ -109,20 +109,20 @@ public class UserDbStorage implements UserStorage {
     }
 
     public List<User> getCommonFriends(int userId, int friendId) {
-        String createQuery = "SELECT u.* " +
-                "FROM friends AS f1 " +
-                "JOIN friends AS f2 ON f2.userid = ? " +
-                "AND f2.friendid = f1.friendid " +
-                "JOIN users AS u ON f1.friendid = u.userid " +
-                "WHERE f1.userid = ?";
+        String createQuery = "select u.* " +
+                "from friends as f1 " +
+                "join friends as f2 on f2.userId = ? " +
+                "and f2.friendId = f1.friendId " +
+                "join users as u on f1.friendId = u.userId " +
+                "where f1.userId = ?";
 
         return jdbcTemplate.query(createQuery, this::mapRowToUser, userId, friendId);
     }
 
     public void addFriend(int userId, int friendId) {
 
-        String createQuery = "INSERT INTO friends(userid, friendid, status) " +
-                "VALUES (?, ?, ?)";
+        String createQuery = "insert into friends(UserId, FriendId, status) " +
+                "values (?, ?, ?)";
         jdbcTemplate.update(createQuery,
                 userId, friendId, false);
         log.info("Friend added");
@@ -130,15 +130,15 @@ public class UserDbStorage implements UserStorage {
     }
 
     public List<User> getFriends(int userId) {
-        String createQuery = "SELECT u.* " +
-                "FROM friends AS f1 " +
-                "JOIN users AS u ON f1.friendid = u.userid " +
-                "WHERE f1.userid = ?";
+        String createQuery = "select u.* " +
+                "from friends as f1 " +
+                "join users as u on f1.friendId = u.userId " +
+                "where f1.userId = ?";
         return jdbcTemplate.query(createQuery, this::mapRowToUser, userId);
     }
 
     public void removeFriend(int userId, int friendId) {
-        String createQuery = "DELETE FROM friends WHERE userid = ? AND friendid = ?";
+        String createQuery = "DELETE FROM friends WHERE userid = ? and friendid = ?";
         jdbcTemplate.update(createQuery, userId, friendId);
     }
 }
