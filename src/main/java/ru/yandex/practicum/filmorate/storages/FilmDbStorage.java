@@ -5,11 +5,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
-
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 
@@ -18,10 +16,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import java.sql.Date;
+import java.util.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -78,9 +77,9 @@ public class FilmDbStorage implements FilmStorage {
         if (updateSuccess == 1) {
             createQuery = "delete from FILMS_GENRES where  filmid = ? ";
             jdbcTemplate.update(createQuery, film.getId());
-            String createQuery2 = "insert into FILMS_GENRES(genreid, filmid) values (?, ?)";
             directorStorage.updateDirectorsFromFilm(film);
             film.setDirectors(directorStorage.getDirectorsFromFilm(film));
+            String createQuery2 = "insert into FILMS_GENRES(genreid, filmid) values (?, ?)";
             if (film.getGenres() != null && film.getGenres().size() > 0) {
                 for (Genre genre : film.getGenres()) {
                     try {
@@ -89,11 +88,10 @@ public class FilmDbStorage implements FilmStorage {
                         log.warn("Genres update error");
                     }
                 }
+                return Optional.of(film);
             }
-            return Optional.of(film);
-        } else {
-            return Optional.ofNullable(null);
         }
+        return Optional.ofNullable(null);
     }
 
     public List<Film> findAll() {
@@ -104,35 +102,17 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     public Optional<Film> getFilm(int filmId) {
+        Film film;
         String createQuery = "select f.*, R.MPA as mpaName " +
                 "from FILMS f " +
                 "join MPA R on R.MPAID = F.MPAID where f.FILMID = ?";
-        final List<Film> films = jdbcTemplate.query(createQuery, this::mapRowToFilm, filmId);
-        if (films.size() != 1) {
-            throw new NotFoundException("Фильм с id " + filmId + " не найден");
-        }
-        return Optional.of(films.get(0));
+        try {
+            film = jdbcTemplate.query(createQuery, this::mapRowToFilm, filmId).get(0);
+            return Optional.of(film);
 
-//        try {
-//            film = jdbcTemplate.query(createQuery, this::mapRowToFilm, filmId).get(0);
-//            return Optional.of(film);
-//
-//        } catch (EmptyResultDataAccessException e) {
-//            log.warn("film not found");
-//            return Optional.ofNullable(null);
-//        }
-    }
-
-    public boolean delete(int filmId) {
-        String createQuery = "delete from FILMS where filmid = ?";
-        var filmToDelete = this.getFilm(filmId);
-        if (filmToDelete.isPresent()) {
-            jdbcTemplate.update(createQuery, filmId);
-            return true;
-        }
-        else {
-            log.warn("user not found");
-            return false;
+        } catch (EmptyResultDataAccessException e) {
+            log.warn("film not found");
+            return Optional.ofNullable(null);
         }
     }
 
@@ -177,7 +157,7 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     public List<Film> getFilmsDirectorSortedByLike(int directorId) {
-        //���������, ���������� �� ����� ��������
+        //проверили, существует ли такой режжисер
         directorStorage.getDirector(directorId);
         String sql = "SELECT f.*,r.MPA as mpaName FROM FILMS AS F  JOIN FILMS_DIRECTORS AS FD on F.FILMID = FD.FILMID" +
                 " LEFT JOIN  LIKES L on F.FILMID = L.FILMID left join mpa R on F.MPAID = R.MPAID Where DIRECTORID=?" +
@@ -187,7 +167,7 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     public List<Film> getFilmsDirectorSortedByYears(int directorId) {
-        //���������, ���������� �� ����� ��������
+        //проверили, существует ли такой режжисер
         directorStorage.getDirector(directorId);
         String sql = "SELECT f.*,r.MPA as mpaName FROM FILMS AS F  JOIN FILMS_DIRECTORS AS FD on F.FILMID = FD.FILMID" +
                 " left join mpa R on F.MPAID = R.MPAID Where DIRECTORID=? " +
@@ -204,40 +184,6 @@ public class FilmDbStorage implements FilmStorage {
         } catch (EmptyResultDataAccessException e) {
             return 0;
         }
-    }
-
-    public List<Film> search(String query, List<String> searchParam) {
-        List<Film> searchResultList = new ArrayList<>();
-        query = "%" + query.toLowerCase() + "%";
-        if (searchParam.contains("director")) {
-            searchResultList = searchByDirector(query);
-        }
-        if (searchParam.contains("title")) {
-            if (searchResultList.isEmpty()) {
-                searchResultList = searchByTitle(query);
-            } else {
-                searchResultList.addAll(searchByTitle(query));
-            }
-        }
-        return searchResultList;
-    }
-
-    private List<Film> searchByTitle(String query) {
-        String sqlQuery = "(select f.*, r.MPA as mpaName" +
-                "                 from films f" +
-                "                 join MPA R on R.MPAID = F.MPAID" +
-                "                 where lower(f.name) like ?)";
-        return jdbcTemplate.query(sqlQuery, this::mapRowToFilm, query);
-    }
-
-    private List<Film> searchByDirector(String query) {
-        String sqlQuery = "(select f.*, r.MPA as mpaName" +
-                "                 from films f" +
-                "                 join MPA R on R.MPAID = F.MPAID" +
-                "                 join FILMS_DIRECTORS FD on FD.FILMID = F.FILMID" +
-                "                 join DIRECTOR D on D.DIRECTORID = FD.DIRECTORID" +
-                "                 where lower(D.name) like ?)";
-        return jdbcTemplate.query(sqlQuery, this::mapRowToFilm, query);
     }
 
     public List<Film> getCommonFilms(long userId, long friendId) {
