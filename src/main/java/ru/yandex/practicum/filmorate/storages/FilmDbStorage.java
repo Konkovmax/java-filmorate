@@ -51,7 +51,7 @@ public class FilmDbStorage implements FilmStorage {
             return stmt;
         }, keyHolder);
         int filmId = keyHolder.getKey().intValue();
-        String createQuery = "insert into FILMS_GENRES(genreid, filmid) " +
+        String createQuery = "insert into FILMS_GENRES (genreid, filmid) " +
                 "                values (?, ?)";
         film.setId(filmId);
         for (Genre genre : film.getGenres()) {
@@ -100,11 +100,11 @@ public class FilmDbStorage implements FilmStorage {
 
     public Optional<Film> getFilm(int filmId) {
         Film film;
-        String createQuery = "select f.*, r.MPA as mpaName" +
-                " from films f" +
-                " join MPA R on R.MPAID = F.MPAID where f.FILMID = ?";
+        String createQuery = "select f.*, R.MPA as mpaName " +
+                "from FILMS f " +
+                "join MPA R on R.MPAID = F.MPAID where f.FILMID = ?";
         try {
-            film = jdbcTemplate.queryForObject(createQuery, this::mapRowToFilm, filmId);
+            film = jdbcTemplate.query(createQuery, this::mapRowToFilm, filmId).get(0);
             return Optional.of(film);
 
         } catch (EmptyResultDataAccessException e) {
