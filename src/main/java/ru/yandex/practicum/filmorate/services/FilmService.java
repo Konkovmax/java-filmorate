@@ -33,9 +33,11 @@ public class FilmService {
     }
 
     public Film update(Film film) {
+        if(film.getGenres() != null && film.getGenres().size() > 0){
         film.setGenres(film.getGenres().stream()
                 .distinct()
                 .collect(Collectors.toList()));
+    }
         if (filmStorage.update(film).isPresent()) {
             log.info("Film updated");
             return filmStorage.update(film).get();

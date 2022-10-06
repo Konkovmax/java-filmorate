@@ -1,10 +1,10 @@
-package ru.yandex.practicum.filmorate.storages;
+package ru.yandex.practicum.filmorate.storage;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.models.Genre;
+import ru.yandex.practicum.filmorate.model.Genre;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -22,13 +22,13 @@ public class GenreDbStorage {
     }
 
     public List<Genre> findGenres() {
-        String createQuery = "SELECT * FROM genres";
+        String createQuery = "select * from GENRES";
         return jdbcTemplate.query(createQuery, this::mapRowToGenre);
     }
 
     public Optional<Genre> getGenre(int genreId) {
         try {
-            String createQuery = "SELECT * FROM genres WHERE genreid = ?";
+            String createQuery = "select * from GENRES where GENREID = ?";
             return Optional.of(jdbcTemplate.queryForObject(createQuery, this::mapRowToGenre, genreId));
 
         } catch (EmptyResultDataAccessException e) {
@@ -38,12 +38,12 @@ public class GenreDbStorage {
     }
 
     public List<Genre> getFilmsGenre(int filmId) {
-        String createQuery = "SELECT g.* " +
-                " FROM genres g" +
-                " JOIN films_genres f ON g.genreid = f.genreid WHERE f.filmid = ?";
-        List<Genre> genres = jdbcTemplate.query(createQuery, this::mapRowToGenre, filmId);
+        String createQuery = "select g.* " +
+                " from GENRES g" +
+                " join FILMS_GENRES f on g.GENREID = f.GENREID where f.FILMID = ?";
+        List <Genre> genres  = jdbcTemplate.query(createQuery, this::mapRowToGenre, filmId);
         if (genres.size() < 1) {
-            return null;
+        return null;
         }
         return genres;
     }
@@ -52,4 +52,6 @@ public class GenreDbStorage {
         return new Genre(Integer.parseInt(resultSet.getString("genreid")),
                 resultSet.getString("genre"));
     }
+
+
 }
