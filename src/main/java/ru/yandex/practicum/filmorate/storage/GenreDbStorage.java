@@ -41,7 +41,11 @@ public class GenreDbStorage {
         String createQuery = "select g.* " +
                 " from GENRES g" +
                 " join FILMS_GENRES f on g.GENREID = f.GENREID where f.FILMID = ?";
-        return jdbcTemplate.query(createQuery, this::mapRowToGenre, filmId);
+        List <Genre> genres  = jdbcTemplate.query(createQuery, this::mapRowToGenre, filmId);
+        if (genres.size() < 1) {
+        return null;
+        }
+        return genres;
     }
 
     private Genre mapRowToGenre(ResultSet resultSet, int rowNum) throws SQLException {

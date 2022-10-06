@@ -51,11 +51,13 @@ public class FilmDbStorage implements FilmStorage {
             return stmt;
         }, keyHolder);
         int filmId = keyHolder.getKey().intValue();
+        film.setId(filmId);
         String createQuery = "insert into FILMS_GENRES (genreid, filmid) " +
                 "                values (?, ?)";
-        film.setId(filmId);
-        for (Genre genre : film.getGenres()) {
-            jdbcTemplate.update(createQuery, genre.getId(), filmId);
+        if (film.getGenres() != null && film.getGenres().size() > 0) {
+            for (Genre genre : film.getGenres()) {
+                jdbcTemplate.update(createQuery, genre.getId(), filmId);
+            }
         }
         directorStorage.updateDirectorsFromFilm(film);
         film.setDirectors(directorStorage.getDirectorsFromFilm(film));
@@ -75,20 +77,21 @@ public class FilmDbStorage implements FilmStorage {
         if (updateSuccess == 1) {
             createQuery = "delete from FILMS_GENRES where  filmid = ? ";
             jdbcTemplate.update(createQuery, film.getId());
-            String createQuery2 = "insert into FILMS_GENRES(genreid, filmid) values (?, ?)";
             directorStorage.updateDirectorsFromFilm(film);
             film.setDirectors(directorStorage.getDirectorsFromFilm(film));
-            for (Genre genre : film.getGenres()) {
-                try {
-                    jdbcTemplate.update(createQuery2, genre.getId(), film.getId());
-                } catch (DataAccessException e) {
-                    log.warn("Genres update error");
+            String createQuery2 = "insert into FILMS_GENRES(genreid, filmid) values (?, ?)";
+            if (film.getGenres() != null && film.getGenres().size() > 0) {
+                for (Genre genre : film.getGenres()) {
+                    try {
+                        jdbcTemplate.update(createQuery2, genre.getId(), film.getId());
+                    } catch (DataAccessException e) {
+                        log.warn("Genres update error");
+                    }
                 }
+                return Optional.of(film);
             }
-            return Optional.of(film);
-        } else {
-            return Optional.ofNullable(null);
         }
+        return Optional.ofNullable(null);
     }
 
     public List<Film> findAll() {
