@@ -12,4 +12,7 @@ public interface FilmStorage {
     Film create(Film film);
 
     Optional<Film> update(Film film);
+
+    List<Film> getCommonFilms(long userId, long friendId);
 }
+

@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.controllers;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.exceptions.BadRequestException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
@@ -54,4 +55,20 @@ public class FilmController {
         filmService.removeLike(filmId, userId);
     }
 
+    @GetMapping("/films/common")
+    public List<Film> getCommonFilms(@RequestParam(value = "userId", required = true) long userId,
+                             @RequestParam(value = "friendId", required = true) long friendId) {
+        return filmService.getCommonFilms(userId, friendId);
+    }
+
+    @GetMapping("/films/director/{directorId}")
+    public List<Film> getDirectorFilms(@PathVariable int directorId, @RequestParam String sortBy) {
+        if (sortBy.equals("year")) {
+            return filmService.getFilmsDirectorSortedByYears(directorId);
+        } else if (sortBy.equals("likes")) {
+            return filmService.getFilmsDirectorSortedByLike(directorId);
+        } else {
+            throw new BadRequestException("Bad Request. Please repeat by correct sortBy");
+        }
+    }
 }
