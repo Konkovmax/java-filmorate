@@ -8,6 +8,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 
@@ -51,11 +52,13 @@ public class FilmDbStorage implements FilmStorage {
             return stmt;
         }, keyHolder);
         int filmId = keyHolder.getKey().intValue();
+        film.setId(filmId);
         String createQuery = "insert into FILMS_GENRES (genreid, filmid) " +
                 "                values (?, ?)";
-        film.setId(filmId);
-        for (Genre genre : film.getGenres()) {
-            jdbcTemplate.update(createQuery, genre.getId(), filmId);
+        if (film.getGenres() != null && film.getGenres().size() > 0) {
+            for (Genre genre : film.getGenres()) {
+                jdbcTemplate.update(createQuery, genre.getId(), filmId);
+            }
         }
         directorStorage.updateDirectorsFromFilm(film);
         film.setDirectors(directorStorage.getDirectorsFromFilm(film));
@@ -78,11 +81,13 @@ public class FilmDbStorage implements FilmStorage {
             String createQuery2 = "insert into FILMS_GENRES(genreid, filmid) values (?, ?)";
             directorStorage.updateDirectorsFromFilm(film);
             film.setDirectors(directorStorage.getDirectorsFromFilm(film));
-            for (Genre genre : film.getGenres()) {
-                try {
-                    jdbcTemplate.update(createQuery2, genre.getId(), film.getId());
-                } catch (DataAccessException e) {
-                    log.warn("Genres update error");
+            if (film.getGenres() != null && film.getGenres().size() > 0) {
+                for (Genre genre : film.getGenres()) {
+                    try {
+                        jdbcTemplate.update(createQuery2, genre.getId(), film.getId());
+                    } catch (DataAccessException e) {
+                        log.warn("Genres update error");
+                    }
                 }
             }
             return Optional.of(film);
@@ -99,6 +104,9 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     public Optional<Film> getFilm(int filmId) {
+        if(filmId<0){
+            throw new NotFoundException("film not found");
+        }
         Film film;
         String createQuery = "select f.*, R.MPA as mpaName " +
                 "from FILMS f " +
