@@ -75,9 +75,22 @@ public class FilmService {
         }
     }
 
-    public List<Film> getPopular(int count) {
-        return filmStorage.getPopular(count);
+    public List<Film> getPopular(Integer year, Integer genreId, Integer count) {
+        if(year == null && genreId == null){
+            return filmStorage.getPopular(count);
+        }
+        else if (year == null) {
+            //Метод по жанрам
+            return filmStorage.getPopularByGenre(genreId, count);
+        } else if (genreId == null) {
+            //Метод по годам
+            return filmStorage.getPopularByYear(year, count);
+        } else {
+            //Метод по годам и жанрам
+            return filmStorage.getPopularByGenreAndYear(year, genreId, count);
+        }
     }
+
 
     public List<Film> getCommonFilms(Long userId, Long friendId) {
         return getSortedFilms(filmStorage.getCommonFilms(userId, friendId));
