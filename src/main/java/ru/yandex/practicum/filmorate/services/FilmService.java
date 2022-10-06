@@ -75,7 +75,7 @@ public class FilmService {
         }
     }
 
-    public List<Film> getPopular(Integer year, Integer genreId, Integer count) {
+    public List<Film> getPopular(Integer year, Integer genreId, int count) {
         if(year == null && genreId == null){
             return filmStorage.getPopular(count);
         }
