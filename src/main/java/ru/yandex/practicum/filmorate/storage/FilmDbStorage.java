@@ -245,7 +245,6 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     public List<Film> getPopular(Integer count) {
-        System.out.println("популярный фильм");
         String createQuery = "select f.*, r.MPA as mpaName, count(l.USERSID) " +
                 "from FILMS as f " +
                 " left outer join LIKES as l " +
@@ -257,14 +256,6 @@ public class FilmDbStorage implements FilmStorage {
                 "limit ?";
 
 
-      //  String createQuery = "select f.*, r.MPA as mpaName, count(l.USERSID) " +
-//                "from FILMS as f " +
-//                " left outer join LIKES as l " +
-//                "on f.filmId = l.FILMID " +
-//                "join MPA R on R.MPAID = f.MPAID " +
-//                "GROUP BY f.FILMID " +
-//                "order by count(l.USERSID) desc, f.NAME " +
-//                "limit ?";
 
         List<Film> film = jdbcTemplate.query(createQuery, this::mapRowToFilm, count);
         log.info("Popular Film has found");
