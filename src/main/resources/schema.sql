@@ -1,13 +1,6 @@
-DROP TABLE LIKES if exists;
-DROP TABLE FRIENDS if exists;
-DROP TABLE FILMS_GENRES if exists;
-DROP TABLE GENRES if exists;
-DROP TABLE FILMS_DIRECTORS if exists;
-drop table FILMS if exists;
-drop table DIRECTOR if exists;
-DROP TABLE RATINGS if exists;
-DROP TABLE MPA if exists;
-DROP TABLE USERS if exists;
+
+DROP TABLE  IF EXISTS LIKES, FRIENDS, FILMS_GENRES, GENRES , FILMS , RATINGS , MPA , USERS;
+
 CREATE TABLE IF NOT EXISTS "USERS"
 (
     "USERID"   INT     NOT NULL AUTO_INCREMENT,
@@ -86,6 +79,28 @@ CREATE TABLE IF NOT EXISTS "DIRECTOR"
     );
 
 
+
+CREATE TABLE "REVIEWS" (
+                           "REVIEWID" INT   NOT NULL AUTO_INCREMENT,
+                           "FILMID" INT   NOT NULL,
+                           "USERID" INT   NOT NULL,
+                           "CONTENT" VARCHAR   not null ,
+                           "ISPOSITIVE" BOOLEAN   NOT NULL,
+                           CONSTRAINT "PK_REVIEWS" PRIMARY KEY (
+                                                                "REVIEWID"
+                               )
+);
+
+CREATE TABLE "REVIEW_SCORES" (
+                                 "REVIEWID" INT   NOT NULL,
+                                 "USERID" INT   NOT NULL,
+                                 "ISLIKE" BOOLEAN   NOT NULL,
+                                 CONSTRAINT "PK_REVIEW_SCORES" PRIMARY KEY (
+                                                                            "REVIEWID","USERID"
+                                     )
+);
+
+
 ALTER TABLE "FRIENDS"
     ADD CONSTRAINT "FK_FRIENDS_USERID" FOREIGN KEY ("USERID")
         REFERENCES "USERS" ("USERID");
@@ -113,3 +128,17 @@ ALTER TABLE "FILMS_GENRES"
 ALTER TABLE "FILMS_GENRES"
     ADD CONSTRAINT "FK_FILMS_GENRES_FILMID" FOREIGN KEY ("FILMID")
         REFERENCES "FILMS" ("FILMID");
+
+
+
+ALTER TABLE "REVIEWS" ADD CONSTRAINT "FK_REVIEWS_FILMID" FOREIGN KEY("FILMID")
+    REFERENCES "FILMS" ("FILMID");
+
+ALTER TABLE "REVIEWS" ADD CONSTRAINT "FK_REVIEWS_USERSID" FOREIGN KEY("USERID")
+    REFERENCES "USERS" ("USERID");
+
+ALTER TABLE "REVIEW_SCORES" ADD CONSTRAINT "FK_REVIEW_SCORES_REVIEWID" FOREIGN KEY("REVIEWID")
+    REFERENCES "REVIEWS" ("REVIEWID") on delete cascade ;
+
+ALTER TABLE "REVIEW_SCORES" ADD CONSTRAINT "FK_REVIEW_SCORES_USERID" FOREIGN KEY("USERID")
+    REFERENCES "USERS" ("USERID");
