@@ -5,8 +5,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.storage.FilmDbStorage;
 import ru.yandex.practicum.filmorate.storage.UserDbStorage;
+import ru.yandex.practicum.filmorate.storage.FilmDbStorage;
 
 import java.util.Arrays;
 import java.util.List;
@@ -98,4 +98,11 @@ public class FilmService {
     public List<Film> getFilmsDirectorSortedByYears(int directorId) {
         return filmStorage.getFilmsDirectorSortedByYears(directorId);
     }
+    
+    public List<Film> search(String query, String params) {
+        String [] items = params.split(",");
+        List<String> searchParam = Arrays.asList(items);
+        return getSortedFilms(filmStorage.search(query, searchParam));
+
+    }   
 }

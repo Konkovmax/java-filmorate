@@ -55,6 +55,12 @@ public class FilmController {
         filmService.removeLike(filmId, userId);
     }
 
+    @GetMapping("/films/search")
+    public List<Film> search(@RequestParam(value = "query", required = true) String query,
+                             @RequestParam(value = "by", required = true) String by) {
+        return filmService.search(query, by);
+    }
+
     @GetMapping("/films/common")
     public List<Film> getCommonFilms(@RequestParam(value = "userId", required = true) long userId,
                              @RequestParam(value = "friendId", required = true) long friendId) {
@@ -71,4 +77,5 @@ public class FilmController {
             throw new BadRequestException("Bad Request. Please repeat by correct sortBy");
         }
     }
+
 }
