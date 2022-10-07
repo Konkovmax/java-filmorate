@@ -112,15 +112,6 @@ public class FilmDbStorage implements FilmStorage {
             throw new NotFoundException("Фильм с id " + filmId + " не найден");
         }
         return Optional.of(films.get(0));
-
-//        try {
-//            film = jdbcTemplate.query(createQuery, this::mapRowToFilm, filmId).get(0);
-//            return Optional.of(film);
-//
-//        } catch (EmptyResultDataAccessException e) {
-//            log.warn("film not found");
-//            return Optional.ofNullable(null);
-//        }
     }
 
     public List<Film> getPopular(int count) {
