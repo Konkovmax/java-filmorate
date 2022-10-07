@@ -61,6 +61,14 @@ public class UserService {
         }
     }
 
+    public void delete(int userId) {
+        boolean deletedUser = userStorage.delete(userId);
+        if (!deletedUser) {
+            throw new NotFoundException(String.format(
+                    "User with id: %s not found", userId));
+        }
+    }
+
     public void addFriend(int userId, int friendId) {
 
         if (userStorage.userExistCheck(userId) == 0) {

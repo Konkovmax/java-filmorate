@@ -69,6 +69,19 @@ public class UserDbStorage implements UserStorage {
 
     }
 
+    public boolean delete(int userId) {
+        String createQuery = "delete from USERS where userid = ?";
+        var userToDelete = this.getUser(userId);
+        if (userToDelete.isPresent()) {
+            jdbcTemplate.update(createQuery, userId);
+            return true;
+        }
+        else {
+            log.warn("user not found");
+            return false;
+        }
+    }
+
     private User mapRowToUser(ResultSet resultSet, int rowNum) throws SQLException {
         return new User(Integer.parseInt(resultSet.getString("userid")),
                 resultSet.getString("name"),
