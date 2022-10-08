@@ -1,10 +1,11 @@
-package ru.yandex.practicum.filmorate.services;
+package ru.yandex.practicum.filmorate.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.models.Event;
-import ru.yandex.practicum.filmorate.storages.EventDbStorage;
+import ru.yandex.practicum.filmorate.model.Event;
+import ru.yandex.practicum.filmorate.storage.EventDbStorage;
+import ru.yandex.practicum.filmorate.storage.EventStorage;
 
 import java.util.List;
 
@@ -18,7 +19,5 @@ public class EventService {
         this.eventStorage = eventStorage;
     }
 
-    public List<Event> getAllEvents(int userId) {
-        return eventStorage.getAllEvents(userId);
-    }
+    public List<Event> getAllEvents(int userId) { return eventStorage.getAllEvents(userId); }
 }

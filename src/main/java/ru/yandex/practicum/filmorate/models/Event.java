@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.models;
+package ru.yandex.practicum.filmorate.model;
 
 import lombok.Data;
 
@@ -9,7 +9,6 @@ public class Event {
     String eventType;
     String operation;
     int entityId;
-    long timestamp;
 
     public Event(int userId, String eventType, String operation) {
         this.userId = userId;

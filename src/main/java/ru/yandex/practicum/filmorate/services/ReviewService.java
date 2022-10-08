@@ -1,16 +1,16 @@
-package ru.yandex.practicum.filmorate.services;
+package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exceptions.BadRequestException;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
-import ru.yandex.practicum.filmorate.models.Event;
-import ru.yandex.practicum.filmorate.models.Review;
-import ru.yandex.practicum.filmorate.storages.EventDbStorage;
-import ru.yandex.practicum.filmorate.storages.FilmDbStorage;
-import ru.yandex.practicum.filmorate.storages.ReviewDbStorage;
-import ru.yandex.practicum.filmorate.storages.UserDbStorage;
+import ru.yandex.practicum.filmorate.model.Event;
+import ru.yandex.practicum.filmorate.model.Review;
+import ru.yandex.practicum.filmorate.storage.EventDbStorage;
+import ru.yandex.practicum.filmorate.storage.FilmDbStorage;
+import ru.yandex.practicum.filmorate.storage.ReviewDbStorage;
+import ru.yandex.practicum.filmorate.storage.UserDbStorage;
 
 import java.util.Collections;
 import java.util.Comparator;
@@ -58,11 +58,9 @@ public class ReviewService {
     }
 
     public Review update(Review review) {
-        int reviewId = review.getReviewId();
         var updatedReview = reviewStorage.update(review);
         if (updatedReview.isPresent()) {
-            int userId = reviewStorage.getReview(reviewId).get().getUserId();
-            Event reviewEvent = new Event(userId, "REVIEW", "UPDATE");
+            Event reviewEvent = new Event(updatedReview.get().getUserId(), "REVIEW", "UPDATE");
             reviewEvent.setEntityId(updatedReview.get()
                     .getReviewId());
             eventStorage.addEvent(reviewEvent);
@@ -101,7 +99,7 @@ public class ReviewService {
         }
     }
 
-    private final Comparator<Review> comparator = Comparator.comparingInt(Review::getUseful).reversed();
+    private Comparator<Review> comparator = Comparator.comparingInt(Review::getUseful).reversed();
 
     public List<Review> getAllReviews(int filmId, int count) {
         List<Review> reviews;

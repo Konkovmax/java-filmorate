@@ -167,7 +167,7 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     public List<Film> getFilmsDirectorSortedByLike(int directorId) {
-        //проверили, существует ли такой режжисер
+        //пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
         directorStorage.getDirector(directorId);
         String sql = "SELECT f.*,r.MPA as mpaName FROM FILMS AS F  JOIN FILMS_DIRECTORS AS FD on F.FILMID = FD.FILMID" +
                 " LEFT JOIN  LIKES L on F.FILMID = L.FILMID left join mpa R on F.MPAID = R.MPAID Where DIRECTORID=?" +
@@ -177,7 +177,7 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     public List<Film> getFilmsDirectorSortedByYears(int directorId) {
-        //проверили, существует ли такой режжисер
+        //пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
         directorStorage.getDirector(directorId);
         String sql = "SELECT f.*,r.MPA as mpaName FROM FILMS AS F  JOIN FILMS_DIRECTORS AS FD on F.FILMID = FD.FILMID" +
                 " left join mpa R on F.MPAID = R.MPAID Where DIRECTORID=? " +
