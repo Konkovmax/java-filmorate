@@ -27,17 +27,14 @@ public class DirectorDbStorage {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    public List<Director> findAllDirectors() {
+    public List<Director> findAll() {
         String createQuery = "select DIRECTORID AS ID,NAME from DIRECTOR";
         return jdbcTemplate.query(createQuery, new BeanPropertyRowMapper<>(Director.class));
     }
 
-    public Director getDirector(int directorId) {
+    public List<Director> getDirector(int directorId) {
         String sql = "SELECT DIRECTORID AS ID,NAME FROM DIRECTOR WHERE DIRECTORID=?";
-        return jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(Director.class), directorId).stream().findFirst()
-                .orElseThrow(() -> new NotFoundException(String.format(
-                        "Director with id: %s not found",
-                        directorId)));
+        return jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(Director.class), directorId);
     }
 
     public Director createDirector(Director director) {
@@ -55,18 +52,13 @@ public class DirectorDbStorage {
         return director;
     }
 
-    public Director upDateDirector(Director director) {
-        //проверили, существует ли такой режжисер
-        getDirector(director.getId());
+    public void upDateDirector(Director director) {
         String sql = "UPDATE DIRECTOR SET NAME=? WHERE DIRECTORID=? ";
         jdbcTemplate.update(sql, director.getName(), director.getId());
         log.info("Director updated");
-        return getDirector(director.getId());
     }
 
     public void deleteDirector(int directorId) {
-        //проверили, существует ли такой режжисер
-        getDirector(directorId);
         //удаляем директора из таблицы фильм-директор
         String sql = "DELETE FROM FILMS_DIRECTORS WHERE DIRECTORID=?";
         jdbcTemplate.update(sql, directorId);
@@ -87,7 +79,10 @@ public class DirectorDbStorage {
         jdbcTemplate.update(sql, film.getId());
         if (directors != null) {
             //проверяем есть ли в базе такие директоры
-            directors.forEach(director -> getDirector(director.getId()));
+            directors.forEach(director -> getDirector(director.getId()).stream().findFirst()
+                    .orElseThrow(() -> new NotFoundException(String.format(
+                            "Director with id: %s not found",
+                            director.getId()))));
             //вписываем новых директоров
             String sql2 = "INSERT INTO FILMS_DIRECTORS(FILMID,DIRECTORID) VALUES (?,?)";
             directors.forEach(director -> jdbcTemplate.update(sql2, film.getId(), director.getId()));
