@@ -17,11 +17,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import java.sql.Date;
-import java.util.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
+
 
 @Slf4j
 @Component
@@ -114,6 +113,17 @@ public class FilmDbStorage implements FilmStorage {
         return Optional.of(films.get(0));
     }
 
+    public boolean delete(int filmId) {
+        String createQuery = "delete from FILMS where filmid = ?";
+        var filmToDelete = this.getFilm(filmId);
+        if (filmToDelete.isPresent()) {
+            jdbcTemplate.update(createQuery, filmId);
+            return true;
+        } else {
+            log.warn("user not found");
+            return false;
+        }
+    }
 
     public void addLike(int filmId, int userId) {
         String createQuery = "insert into LIKES(filmid, usersid) " +
@@ -144,21 +154,31 @@ public class FilmDbStorage implements FilmStorage {
 
     public List<Film> getFilmsDirectorSortedByLike(int directorId) {
         //проверили, существует ли такой режжисер
-        directorStorage.getDirector(directorId);
-        String sql = "SELECT f.*,r.MPA as mpaName FROM FILMS AS F  JOIN FILMS_DIRECTORS AS FD on F.FILMID = FD.FILMID" +
-                " LEFT JOIN  LIKES L on F.FILMID = L.FILMID left join mpa R on F.MPAID = R.MPAID Where DIRECTORID=?" +
-                " GROUP BY F.FILMID ORDER BY COUNT(USERSID) DESC";
+        if (!directorStorage.getDirector(directorId).isEmpty()) {
+            String sql = "SELECT f.*,r.MPA as mpaName FROM FILMS AS F  JOIN FILMS_DIRECTORS AS FD on F.FILMID = FD.FILMID" +
+                    " LEFT JOIN  LIKES L on F.FILMID = L.FILMID left join mpa R on F.MPAID = R.MPAID Where DIRECTORID=?" +
+                    " GROUP BY F.FILMID ORDER BY COUNT(USERSID) DESC";
 
-        return new ArrayList<>(jdbcTemplate.query(sql, this::mapRowToFilm, directorId));
+            return new ArrayList<>(jdbcTemplate.query(sql, this::mapRowToFilm, directorId));
+        } else {
+            throw new NotFoundException(String.format(
+                    "Director with id: %s not found",
+                    directorId));
+        }
     }
 
     public List<Film> getFilmsDirectorSortedByYears(int directorId) {
         //проверили, существует ли такой режжисер
-        directorStorage.getDirector(directorId);
-        String sql = "SELECT f.*,r.MPA as mpaName FROM FILMS AS F  JOIN FILMS_DIRECTORS AS FD on F.FILMID = FD.FILMID" +
-                " left join mpa R on F.MPAID = R.MPAID Where DIRECTORID=? " +
-                "ORDER BY EXTRACT(YEAR FROM CAST(RELEASEDATE AS DATE) )";
-        return new ArrayList<>(jdbcTemplate.query(sql, this::mapRowToFilm, directorId));
+        if (!directorStorage.getDirector(directorId).isEmpty()) {
+            String sql = "SELECT f.*,r.MPA as mpaName FROM FILMS AS F  JOIN FILMS_DIRECTORS AS FD on F.FILMID = FD.FILMID" +
+                    " left join mpa R on F.MPAID = R.MPAID Where DIRECTORID=? " +
+                    "ORDER BY EXTRACT(YEAR FROM CAST(RELEASEDATE AS DATE) )";
+            return new ArrayList<>(jdbcTemplate.query(sql, this::mapRowToFilm, directorId));
+        } else {
+            throw new NotFoundException(String.format(
+                    "Director with id: %s not found",
+                    directorId));
+        }
     }
 
     private int getFilmIdFromDb(String name) {
@@ -170,6 +190,40 @@ public class FilmDbStorage implements FilmStorage {
         } catch (EmptyResultDataAccessException e) {
             return 0;
         }
+    }
+
+    public List<Film> search(String query, List<String> searchParam) {
+        List<Film> searchResultList = new ArrayList<>();
+        query = "%" + query.toLowerCase() + "%";
+        if (searchParam.contains("director")) {
+            searchResultList = searchByDirector(query);
+        }
+        if (searchParam.contains("title")) {
+            if (searchResultList.isEmpty()) {
+                searchResultList = searchByTitle(query);
+            } else {
+                searchResultList.addAll(searchByTitle(query));
+            }
+        }
+        return searchResultList;
+    }
+
+    private List<Film> searchByTitle(String query) {
+        String sqlQuery = "(select f.*, r.MPA as mpaName" +
+                "                 from films f" +
+                "                 join MPA R on R.MPAID = F.MPAID" +
+                "                 where lower(f.name) like ?)";
+        return jdbcTemplate.query(sqlQuery, this::mapRowToFilm, query);
+    }
+
+    private List<Film> searchByDirector(String query) {
+        String sqlQuery = "(select f.*, r.MPA as mpaName" +
+                "                 from films f" +
+                "                 join MPA R on R.MPAID = F.MPAID" +
+                "                 join FILMS_DIRECTORS FD on FD.FILMID = F.FILMID" +
+                "                 join DIRECTOR D on D.DIRECTORID = FD.DIRECTORID" +
+                "                 where lower(D.name) like ?)";
+        return jdbcTemplate.query(sqlQuery, this::mapRowToFilm, query);
     }
 
     public List<Film> getCommonFilms(long userId, long friendId) {
