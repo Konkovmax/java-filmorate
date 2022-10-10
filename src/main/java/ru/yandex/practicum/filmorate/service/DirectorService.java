@@ -1,12 +1,14 @@
 package ru.yandex.practicum.filmorate.service;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.storage.DirectorDbStorage;
 
 import java.util.List;
-
+@Slf4j
 @Service
 public class DirectorService {
     private final DirectorDbStorage directorStorage;
@@ -17,11 +19,14 @@ public class DirectorService {
     }
 
     public List<Director> findAllDirectors() {
-        return directorStorage.findAllDirectors();
+        return directorStorage.findAll();
     }
 
     public Director getDirector(int directorId) {
-        return directorStorage.getDirector(directorId);
+        return directorStorage.getDirector(directorId).stream().findFirst()
+                .orElseThrow(() -> new NotFoundException(String.format(
+                        "Director with id: %s not found",
+                        directorId)));
     }
 
     public Director createDirector(Director director) {
@@ -29,10 +34,13 @@ public class DirectorService {
     }
 
     public Director upDateDirector(Director director) {
-        return directorStorage.upDateDirector(director);
+        getDirector(director.getId());
+        directorStorage.upDateDirector(director);
+        return getDirector(director.getId());
     }
 
     public void deleteDirector(int directorId) {
+        getDirector(directorId);
         directorStorage.deleteDirector(directorId);
     }
 }
