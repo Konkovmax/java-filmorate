@@ -25,8 +25,9 @@ public class EventDbStorage implements EventStorage{
 
     @Override
     public void addEvent(Event event) {
-        if (event == null)
+        if (event == null) {
             return;
+        }
 
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
@@ -43,7 +44,7 @@ public class EventDbStorage implements EventStorage{
         }, keyHolder);
         event.setEventId(keyHolder.getKey().intValue());
 
-        String sqlEntity = "";
+                String sqlEntity = "";
         switch (event.getEventType()) {
             case "LIKE":
                 sqlEntity = "INSERT INTO EVENT_LIKE (EVENTID, FILMID) VALUES (?, ?)";
@@ -55,13 +56,12 @@ public class EventDbStorage implements EventStorage{
                 sqlEntity = "INSERT INTO EVENT_FRIEND (EVENTID, FRIENDID) VALUES (?, ?)";
                 break;
         }
-        System.out.println("##################### ADD #" + event + "###########################");
         jdbcTemplate.update(sqlEntity, event.getEventId(), event.getEntityId());
     }
 
     @Override
     public List<Event> getAllEvents(int userId) {
-        String sql = "select E.EVENTID, E.USERID, ET.EVENTTYPE, OP.OPERATION, EL.FILMID as FILMID, " +
+        String sql = "select E.EVENTID, E.USERID, E.TIMESTAMP, ET.EVENTTYPE, OP.OPERATION, EL.FILMID as FILMID, " +
                 "       ER.REVIEWID as REVIEWID, EF.FRIENDID as FRIENDID " +
                 "from EVENTS as E " +
                 "left join EVENT_LIKE as EL on E.EVENTID = EL.EVENTID " +
@@ -88,7 +88,8 @@ public class EventDbStorage implements EventStorage{
         else if ("FRIEND".equals(event.getEventType()))
             entityId = rs.getInt("FRIENDID");
         event.setEntityId(entityId);
-        System.out.println("##################### GET #" + event + "###########################");
+        var date = rs.getTimestamp("TIMESTAMP").getTime();
+        event.setTimestamp(date);
         return event;
     }
 }
