@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.util.ArrayList;
@@ -21,28 +20,28 @@ public class RecommendationDBStorage {
 
     public List<Film> recommendations(int userId) {
         List<Film> recommendations = new ArrayList<>();
-        String createQuery = "select FILMID from LIKES Where USERSID = ? ";
+        String createQuery = "SELECT filmid FROM likes WHERE usersid = ? ";
         List<Integer> filmsForUserId = jdbcTemplate.queryForList(createQuery, Integer.class, userId);
-        if (filmsForUserId.size()<1) {
+        if (filmsForUserId.size() < 1) {
             return recommendations;
         }
-        createQuery = "select USERSID from(select USERSID, COUNT(FILMID) as commonFilm " +
-                "from LIKES " +
-                "WHERE USERSID != ? " +
-                "AND FILMID IN (select FILMID from LIKES Where USERSID = ?) " +
-                "GROUP BY USERSID " +
-                "ORDER BY commonFilm DESC " +
+        createQuery = "SELECT usersid FROM(SELECT usersid, COUNT(filmid) AS commonfilm " +
+                "FROM likes " +
+                "WHERE usersid != ? " +
+                "AND filmid IN (SELECT filmid FROM likes WHERE usersid = ?) " +
+                "GROUP BY usersid " +
+                "ORDER BY commonfilm DESC " +
                 "LIMIT 1) ";
 
-        List <Integer> otherUserIds = jdbcTemplate.queryForList(createQuery, Integer.class, userId, userId);
-        if (otherUserIds.size()<1) {
-          return recommendations;
+        List<Integer> otherUserIds = jdbcTemplate.queryForList(createQuery, Integer.class, userId, userId);
+        if (otherUserIds.size() < 1) {
+            return recommendations;
         }
         int otherUserId = otherUserIds.get(0);
 
-        String createQueryRecommendation = "select FILMID from LIKES " +
-                "WHERE USERSID = ? AND " +
-                "FILMID NOT IN (select FILMID from LIKES Where USERSID = ?) ";
+        String createQueryRecommendation = "SELECT filmid FROM likes " +
+                "WHERE usersid = ? AND " +
+                "filmid NOT IN (SELECT filmid FROM likes WHERE usersid = ?) ";
 
         List<Integer> filmsId = jdbcTemplate.queryForList(createQueryRecommendation, Integer.class, otherUserId, userId);
 

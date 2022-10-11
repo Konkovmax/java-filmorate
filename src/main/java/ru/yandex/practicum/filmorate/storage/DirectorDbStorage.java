@@ -11,9 +11,7 @@ import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 
-
 import java.sql.PreparedStatement;
-import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -28,18 +26,18 @@ public class DirectorDbStorage {
     }
 
     public List<Director> findAll() {
-        String createQuery = "select DIRECTORID AS ID,NAME from DIRECTOR";
+        String createQuery = "SELECT directorid AS id,name FROM director";
         return jdbcTemplate.query(createQuery, new BeanPropertyRowMapper<>(Director.class));
     }
 
     public List<Director> getDirector(int directorId) {
-        String sql = "SELECT DIRECTORID AS ID,NAME FROM DIRECTOR WHERE DIRECTORID=?";
+        String sql = "SELECT directorid AS id,name FROM director WHERE directorid=?";
         return jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(Director.class), directorId);
     }
 
     public Director createDirector(Director director) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
-        String sql = "INSERT INTO DIRECTOR(NAME) VALUES (?)";
+        String sql = "INSERT INTO director(name) VALUES (?)";
         jdbcTemplate.update(connection -> {
             PreparedStatement stmt = connection.prepareStatement(sql, new String[]{"DIRECTORID"});
             stmt.setString(1, director.getName());
@@ -53,29 +51,29 @@ public class DirectorDbStorage {
     }
 
     public void upDateDirector(Director director) {
-        String sql = "UPDATE DIRECTOR SET NAME=? WHERE DIRECTORID=? ";
+        String sql = "UPDATE director SET name=? WHERE directorid=? ";
         jdbcTemplate.update(sql, director.getName(), director.getId());
         log.info("Director updated");
     }
 
     public void deleteDirector(int directorId) {
         //удаляем директора из таблицы фильм-директор
-        String sql = "DELETE FROM FILMS_DIRECTORS WHERE DIRECTORID=?";
+        String sql = "DELETE FROM films_directors WHERE directorid=?";
         jdbcTemplate.update(sql, directorId);
         //удаляем директора из таблицы директоров
-        String sql2 = "DELETE FROM DIRECTOR WHERE DIRECTORID=?";
+        String sql2 = "DELETE FROM director WHERE directorid=?";
         jdbcTemplate.update(sql2, directorId);
     }
 
     public List<Director> getDirectorsFromFilm(Film film) {
-        String sql = "SELECT D.DIRECTORID AS ID,D.NAME FROM DIRECTOR AS D JOIN FILMS_DIRECTORS AS FD ON D.DIRECTORID=FD.DIRECTORID WHERE FD.FILMID=?";
+        String sql = "SELECT d.directorid AS id,d.name FROM director AS d JOIN films_directors AS fd ON d.directorid=fd.directorid WHERE fd.filmid=?";
         return jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(Director.class), film.getId());
     }
 
     public void updateDirectorsFromFilm(Film film) {
         List<Director> directors = film.getDirectors();
         //удаляем старые данные если они есть
-        String sql = "DELETE FROM FILMS_DIRECTORS WHERE FILMID=?";
+        String sql = "DELETE FROM films_directors WHERE filmid=?";
         jdbcTemplate.update(sql, film.getId());
         if (directors != null) {
             //проверяем есть ли в базе такие директоры
@@ -84,7 +82,7 @@ public class DirectorDbStorage {
                             "Director with id: %s not found",
                             director.getId()))));
             //вписываем новых директоров
-            String sql2 = "INSERT INTO FILMS_DIRECTORS(FILMID,DIRECTORID) VALUES (?,?)";
+            String sql2 = "INSERT INTO films_directors(filmid,directorid) VALUES (?,?)";
             directors.forEach(director -> jdbcTemplate.update(sql2, film.getId(), director.getId()));
         }
     }

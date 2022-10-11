@@ -31,7 +31,9 @@ public class FilmController {
     }
 
     @DeleteMapping(value = "/films/{id}")
-    public void delete(@PathVariable("id") Integer filmId) { filmService.delete(filmId); }
+    public void delete(@PathVariable("id") Integer filmId) {
+        filmService.delete(filmId);
+    }
 
     @GetMapping("/films")
     public List<Film> findAll() {
@@ -45,10 +47,8 @@ public class FilmController {
 
     @GetMapping("/films/popular")
     public List<Film> getPopular(@RequestParam(value = "genreId", required = false) Integer genreId,
-                                 @RequestParam(value = "count", defaultValue = "10", required = false)
-                                 int count,
-                                 @RequestParam(value = "year", required = false)
-                                     Integer year) {
+                                 @RequestParam(value = "count", defaultValue = "10", required = false) int count,
+                                 @RequestParam(value = "year", required = false) Integer year) {
         return filmService.getPopular(year, genreId, count);
     }
 
@@ -76,9 +76,9 @@ public class FilmController {
 
     @GetMapping("/films/director/{directorId}")
     public List<Film> getDirectorFilms(@PathVariable int directorId, @RequestParam String sortBy) {
-        if (sortBy.equals("year")) {
+        if ("year".equals(sortBy)) {
             return filmService.getFilmsDirectorSortedByYears(directorId);
-        } else if (sortBy.equals("likes")) {
+        } else if ("likes".equals(sortBy)) {
             return filmService.getFilmsDirectorSortedByLike(directorId);
         } else {
             throw new BadRequestException("Bad Request. Please repeat by correct sortBy");

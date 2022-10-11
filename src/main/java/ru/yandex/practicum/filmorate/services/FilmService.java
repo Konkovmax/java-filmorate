@@ -4,9 +4,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
+import ru.yandex.practicum.filmorate.model.Event;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.storage.FilmDbStorage;
+import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.storage.EventDbStorage;
 import ru.yandex.practicum.filmorate.storage.UserDbStorage;
+import ru.yandex.practicum.filmorate.storage.FilmDbStorage;
 
 import java.util.Arrays;
 import java.util.List;
@@ -17,13 +20,14 @@ import java.util.stream.Collectors;
 public class FilmService {
     private final FilmDbStorage filmStorage;
     private final UserDbStorage userStorage;
+    private final EventDbStorage eventStorage;
 
 
     @Autowired
-    public FilmService(FilmDbStorage filmStorage, UserDbStorage userStorage) {
+    public FilmService(FilmDbStorage filmStorage, UserDbStorage userStorage, EventDbStorage eventStorage) {
         this.filmStorage = filmStorage;
         this.userStorage = userStorage;
-
+        this.eventStorage = eventStorage;
     }
 
     public Film create(Film film) {
@@ -31,11 +35,12 @@ public class FilmService {
     }
 
     public Film update(Film film) {
-        if(film.getGenres() != null && film.getGenres().size() > 0){
-        film.setGenres(film.getGenres().stream()
-                .distinct()
-                .collect(Collectors.toList()));
-    }
+        List<Genre> genres = film.getGenres();
+        if (genres != null && genres.size() > 0) {
+            film.setGenres(genres.stream()
+                    .distinct()
+                    .collect(Collectors.toList()));
+        }
         if (filmStorage.update(film).isPresent()) {
             log.info("Film updated");
             return filmStorage.update(film).get();
@@ -44,6 +49,14 @@ public class FilmService {
             throw new NotFoundException(String.format(
                     "Film with id: %s not found",
                     film.getId()));
+        }
+    }
+
+    public void delete(int filmId) {
+        var deletedFilm = filmStorage.delete(filmId);
+        if (!deletedFilm) {
+            throw new NotFoundException(String.format(
+                    "Film with id: %s not found", filmId));
         }
     }
 
@@ -62,6 +75,9 @@ public class FilmService {
 
     public void addLike(int filmId, int userId) {
         filmStorage.addLike(filmId, userId);
+        Event likeEvent = new Event(userId, "LIKE", "ADD");
+        likeEvent.setEntityId(filmId);
+        eventStorage.addEvent(likeEvent);
     }
 
     public void removeLike(int filmId, int userId) {
@@ -72,14 +88,16 @@ public class FilmService {
                     userId));
         } else {
             filmStorage.removeLike(filmId, userId);
+            Event likeEvent = new Event(userId, "LIKE", "REMOVE");
+            likeEvent.setEntityId(filmId);
+            eventStorage.addEvent(likeEvent);
         }
     }
 
     public List<Film> getPopular(Integer year, Integer genreId, int count) {
-        if(year == null && genreId == null){
+        if (year == null && genreId == null) {
             return filmStorage.getPopular(count);
-        }
-        else if (year == null) {
+        } else if (year == null) {
             //Метод по жанрам
             return filmStorage.getPopularByGenre(genreId, count);
         } else if (genreId == null) {
@@ -112,5 +130,12 @@ public class FilmService {
 
     public List<Film> getFilmsDirectorSortedByYears(int directorId) {
         return filmStorage.getFilmsDirectorSortedByYears(directorId);
+    }
+
+    public List<Film> search(String query, String params) {
+        String[] items = params.split(",");
+        List<String> searchParam = Arrays.asList(items);
+        return getSortedFilms(filmStorage.search(query, searchParam));
+
     }
 }

@@ -1,6 +1,5 @@
 package ru.yandex.practicum.filmorate.storage;
 
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -14,7 +13,7 @@ import java.sql.SQLException;
 import java.util.List;
 
 @Component
-public class EventDbStorage implements EventStorage{
+public class EventDbStorage implements EventStorage {
 
     JdbcTemplate jdbcTemplate;
 
@@ -31,10 +30,10 @@ public class EventDbStorage implements EventStorage{
 
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
-        String sqlEvents = "INSERT INTO EVENTS (USERID, EVENTTYPEID, OPERATIONID) " +
+        String sqlEvents = "INSERT INTO events (userid, eventtypeid, operationid) " +
                 "VALUES (?, " +
-                "        (select EVENTTYPEID from EVENTTYPES where EVENTTYPE=?), " +
-                "        (select OPERATIONID from OPERATIONS where OPERATION=?))";
+                "        (SELECT eventtypeid FROM eventtypes WHERE eventtype=?), " +
+                "        (SELECT operationid FROM operations WHERE operation=?))";
         jdbcTemplate.update(connection -> {
             PreparedStatement ps = connection.prepareStatement(sqlEvents, new String[]{"EVENTID"});
             ps.setInt(1, event.getUserId());
@@ -44,16 +43,16 @@ public class EventDbStorage implements EventStorage{
         }, keyHolder);
         event.setEventId(keyHolder.getKey().intValue());
 
-                String sqlEntity = "";
+        String sqlEntity = "";
         switch (event.getEventType()) {
             case "LIKE":
-                sqlEntity = "INSERT INTO EVENT_LIKE (EVENTID, FILMID) VALUES (?, ?)";
+                sqlEntity = "INSERT INTO event_like (eventid, filmid) VALUES (?, ?)";
                 break;
             case "REVIEW":
-                sqlEntity = "INSERT INTO EVENT_REVIEW (EVENTID, REVIEWID) VALUES (?, ?)";
+                sqlEntity = "INSERT INTO event_review (eventid, reviewid) VALUES (?, ?)";
                 break;
             case "FRIEND":
-                sqlEntity = "INSERT INTO EVENT_FRIEND (EVENTID, FRIENDID) VALUES (?, ?)";
+                sqlEntity = "INSERT INTO event_friend (eventid, friendid) VALUES (?, ?)";
                 break;
         }
         jdbcTemplate.update(sqlEntity, event.getEventId(), event.getEntityId());
@@ -61,15 +60,15 @@ public class EventDbStorage implements EventStorage{
 
     @Override
     public List<Event> getAllEvents(int userId) {
-        String sql = "select E.EVENTID, E.USERID, E.TIMESTAMP, ET.EVENTTYPE, OP.OPERATION, EL.FILMID as FILMID, " +
-                "       ER.REVIEWID as REVIEWID, EF.FRIENDID as FRIENDID " +
-                "from EVENTS as E " +
-                "left join EVENT_LIKE as EL on E.EVENTID = EL.EVENTID " +
-                "left join EVENT_REVIEW as ER on E.EVENTID = ER.EVENTID " +
-                "left join EVENT_FRIEND as EF on E.EVENTID = EF.EVENTID " +
-                "join EVENTTYPES as ET on E.EVENTTYPEID = ET.EVENTTYPEID " +
-                "join OPERATIONS as OP on E.OPERATIONID = OP.OPERATIONID " +
-                "where USERID=?";
+        String sql = "SELECT e.eventid, e.userid, e.timestamp, et.eventtype, op.operation, el.filmid AS filmid, " +
+                "       er.reviewid AS reviewid, ef.friendid AS friendid " +
+                "FROM events AS e " +
+                "LEFT JOIN event_like AS el ON e.eventid = el.eventid " +
+                "LEFT JOIN event_review AS er ON e.eventid = er.eventid " +
+                "LEFT JOIN event_friend AS ef ON e.eventid = ef.eventid " +
+                "JOIN eventtypes AS et ON e.eventtypeid = et.eventtypeid " +
+                "JOIN operations AS op ON e.operationid = op.operationid " +
+                "WHERE userid=?";
 
         List<Event> events = jdbcTemplate.query(sql, this::makeEvent, userId);
 
