@@ -36,7 +36,7 @@ public class RecommendationDBStorage {
 
         List <Integer> otherUserIds = jdbcTemplate.queryForList(createQuery, Integer.class, userId, userId);
         if (otherUserIds.size()<1) {
-          throw new NotFoundException("Пользователь с похожими лайками фильмов не найден");
+          return recommendations;
         }
         int otherUserId = otherUserIds.get(0);
 
