@@ -12,4 +12,15 @@ public interface FilmStorage {
     Film create(Film film);
 
     Optional<Film> update(Film film);
+
+    boolean delete(int filmId);
+
+    List<Film> getCommonFilms(long userId, long friendId);
+
+    List<Film> search(String query, List<String> searchParam);
+    List<Film> getPopularByGenreAndYear(Integer year, int genreId, int count);
+    List<Film> getPopularByGenre(int genreId, int count);
+    List<Film> getPopularByYear(Integer year, int count);
+    List<Film> getPopular(int count);
 }
+

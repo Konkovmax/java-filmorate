@@ -37,10 +37,12 @@ public class Film {
     @Min(1)
     private int duration;
     private Set<Integer> likes = new HashSet<>();
-    private List<Genre> genres = new ArrayList<>();
+    private List<Genre> genres;
 
     @NotNull
     private Mpa mpa;
+
+    private List<Director> directors;
 
     public Film(int id, String name, String description, String releaseDate, int duration, int ratingId, String ratingName) {
         this.id = id;

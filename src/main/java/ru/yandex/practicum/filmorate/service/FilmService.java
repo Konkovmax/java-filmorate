@@ -5,9 +5,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.storage.FilmDbStorage;
 import ru.yandex.practicum.filmorate.storage.UserDbStorage;
+import ru.yandex.practicum.filmorate.storage.FilmDbStorage;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -30,9 +31,11 @@ public class FilmService {
     }
 
     public Film update(Film film) {
+        if(film.getGenres() != null && film.getGenres().size() > 0){
         film.setGenres(film.getGenres().stream()
                 .distinct()
                 .collect(Collectors.toList()));
+    }
         if (filmStorage.update(film).isPresent()) {
             log.info("Film updated");
             return filmStorage.update(film).get();
@@ -41,6 +44,14 @@ public class FilmService {
             throw new NotFoundException(String.format(
                     "Film with id: %s not found",
                     film.getId()));
+        }
+    }
+
+    public void delete(int filmId) {
+        var deletedFilm = filmStorage.delete(filmId);
+        if (!deletedFilm) {
+            throw new NotFoundException(String.format(
+                    "Film with id: %s not found", filmId));
         }
     }
 
@@ -72,7 +83,49 @@ public class FilmService {
         }
     }
 
-    public List<Film> getPopular(int count) {
-        return filmStorage.getPopular(count);
+    public List<Film> getPopular(Integer year, Integer genreId, int count) {
+        if(year == null && genreId == null){
+            return filmStorage.getPopular(count);
+        }
+        else if (year == null) {
+            //Метод по жанрам
+            return filmStorage.getPopularByGenre(genreId, count);
+        } else if (genreId == null) {
+            //Метод по годам
+            return filmStorage.getPopularByYear(year, count);
+        } else {
+            //Метод по годам и жанрам
+            return filmStorage.getPopularByGenreAndYear(year, genreId, count);
+        }
     }
+
+
+    public List<Film> getCommonFilms(Long userId, Long friendId) {
+        return getSortedFilms(filmStorage.getCommonFilms(userId, friendId));
+    }
+
+    private List<Film> getSortedFilms(List<Film> films) {
+        return films.stream().sorted((film0, film1) -> {
+            Integer likeFilm0Size = film0.getLikes().size();
+            Integer likeFilm1Size = film1.getLikes().size();
+            int comp = likeFilm1Size.compareTo(likeFilm0Size);
+            return comp;
+        }).collect(Collectors.toList());
+
+    }
+
+    public List<Film> getFilmsDirectorSortedByLike(int directorId) {
+        return filmStorage.getFilmsDirectorSortedByLike(directorId);
+    }
+
+    public List<Film> getFilmsDirectorSortedByYears(int directorId) {
+        return filmStorage.getFilmsDirectorSortedByYears(directorId);
+    }
+    
+    public List<Film> search(String query, String params) {
+        String [] items = params.split(",");
+        List<String> searchParam = Arrays.asList(items);
+        return getSortedFilms(filmStorage.search(query, searchParam));
+
+    }   
 }

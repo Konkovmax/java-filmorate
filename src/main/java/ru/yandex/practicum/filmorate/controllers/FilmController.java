@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.controllers;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.exceptions.BadRequestException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
@@ -29,6 +30,9 @@ public class FilmController {
         return filmService.update(film);
     }
 
+    @DeleteMapping(value = "/films/{id}")
+    public void delete(@PathVariable("id") Integer filmId) { filmService.delete(filmId); }
+
     @GetMapping("/films")
     public List<Film> findAll() {
         return filmService.findAll();
@@ -40,8 +44,12 @@ public class FilmController {
     }
 
     @GetMapping("/films/popular")
-    public List<Film> getPopular(@RequestParam(value = "count", defaultValue = "10", required = false) Integer count) {
-        return filmService.getPopular(count);
+    public List<Film> getPopular(@RequestParam(value = "genreId", required = false) Integer genreId,
+                                 @RequestParam(value = "count", defaultValue = "10", required = false)
+                                 int count,
+                                 @RequestParam(value = "year", required = false)
+                                     Integer year) {
+        return filmService.getPopular(year, genreId, count);
     }
 
     @PutMapping(value = "/films/{id}/like/{userId}")
@@ -52,6 +60,29 @@ public class FilmController {
     @DeleteMapping(value = "/films/{id}/like/{userId}")
     public void removeLike(@PathVariable("id") Integer filmId, @PathVariable Integer userId) {
         filmService.removeLike(filmId, userId);
+    }
+
+    @GetMapping("/films/search")
+    public List<Film> search(@RequestParam(value = "query", required = true) String query,
+                             @RequestParam(value = "by", required = true) String by) {
+        return filmService.search(query, by);
+    }
+
+    @GetMapping("/films/common")
+    public List<Film> getCommonFilms(@RequestParam(value = "userId", required = true) long userId,
+                             @RequestParam(value = "friendId", required = true) long friendId) {
+        return filmService.getCommonFilms(userId, friendId);
+    }
+
+    @GetMapping("/films/director/{directorId}")
+    public List<Film> getDirectorFilms(@PathVariable int directorId, @RequestParam String sortBy) {
+        if (sortBy.equals("year")) {
+            return filmService.getFilmsDirectorSortedByYears(directorId);
+        } else if (sortBy.equals("likes")) {
+            return filmService.getFilmsDirectorSortedByLike(directorId);
+        } else {
+            throw new BadRequestException("Bad Request. Please repeat by correct sortBy");
+        }
     }
 
 }
