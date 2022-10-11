@@ -37,7 +37,7 @@ public class Film {
     @Min(1)
     private int duration;
     private Set<Integer> likes = new HashSet<>();
-    private List<Genre> genres = new ArrayList<>();
+    private List<Genre> genres;
 
     @NotNull
     private Mpa mpa;
