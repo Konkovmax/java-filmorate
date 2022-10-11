@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Event;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.EventDbStorage;
 import ru.yandex.practicum.filmorate.storage.UserDbStorage;
 import ru.yandex.practicum.filmorate.storage.FilmDbStorage;
@@ -34,11 +35,12 @@ public class FilmService {
     }
 
     public Film update(Film film) {
-        if(film.getGenres() != null && film.getGenres().size() > 0){
-        film.setGenres(film.getGenres().stream()
-                .distinct()
-                .collect(Collectors.toList()));
-    }
+        List<Genre> genres = film.getGenres();
+        if (genres != null && genres.size() > 0) {
+            film.setGenres(genres.stream()
+                    .distinct()
+                    .collect(Collectors.toList()));
+        }
         if (filmStorage.update(film).isPresent()) {
             log.info("Film updated");
             return filmStorage.update(film).get();
@@ -93,10 +95,9 @@ public class FilmService {
     }
 
     public List<Film> getPopular(Integer year, Integer genreId, int count) {
-        if(year == null && genreId == null){
+        if (year == null && genreId == null) {
             return filmStorage.getPopular(count);
-        }
-        else if (year == null) {
+        } else if (year == null) {
             //Метод по жанрам
             return filmStorage.getPopularByGenre(genreId, count);
         } else if (genreId == null) {
@@ -130,11 +131,11 @@ public class FilmService {
     public List<Film> getFilmsDirectorSortedByYears(int directorId) {
         return filmStorage.getFilmsDirectorSortedByYears(directorId);
     }
-    
+
     public List<Film> search(String query, String params) {
-        String [] items = params.split(",");
+        String[] items = params.split(",");
         List<String> searchParam = Arrays.asList(items);
         return getSortedFilms(filmStorage.search(query, searchParam));
 
-    }   
+    }
 }

@@ -4,9 +4,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.RecommendationService;
 import ru.yandex.practicum.filmorate.service.UserService;
-import ru.yandex.practicum.filmorate.model.User;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -55,7 +55,9 @@ public class UserController {
     }
 
     @DeleteMapping(value = "/users/{id}")
-    public void delete(@PathVariable("id") Integer userId) { userService.delete(userId); }
+    public void delete(@PathVariable("id") Integer userId) {
+        userService.delete(userId);
+    }
 
 
     @PutMapping(value = "/users/{id}/friends/{friendId}")
@@ -73,6 +75,4 @@ public class UserController {
     public List<Film> recommendations(@PathVariable("id") Integer userId) {
         return recommendationService.recommendations(userId);
     }
-
-
 }
