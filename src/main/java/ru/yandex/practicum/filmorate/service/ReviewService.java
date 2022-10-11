@@ -58,9 +58,11 @@ public class ReviewService {
     }
 
     public Review update(Review review) {
+        int reviewId = review.getReviewId();
         var updatedReview = reviewStorage.update(review);
         if (updatedReview.isPresent()) {
-            Event reviewEvent = new Event(updatedReview.get().getUserId(), "REVIEW", "UPDATE");
+            int userId = reviewStorage.getReview(reviewId).get().getUserId();
+            Event reviewEvent = new Event(userId, "REVIEW", "UPDATE");
             reviewEvent.setEntityId(updatedReview.get()
                     .getReviewId());
             eventStorage.addEvent(reviewEvent);
