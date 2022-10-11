@@ -5,7 +5,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exceptions.BadRequestException;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
+import ru.yandex.practicum.filmorate.model.Event;
 import ru.yandex.practicum.filmorate.model.Review;
+import ru.yandex.practicum.filmorate.storage.EventDbStorage;
 import ru.yandex.practicum.filmorate.storage.FilmDbStorage;
 import ru.yandex.practicum.filmorate.storage.ReviewDbStorage;
 import ru.yandex.practicum.filmorate.storage.UserDbStorage;
@@ -21,6 +23,7 @@ public class ReviewService {
     private final ReviewDbStorage reviewStorage;
     private final UserDbStorage userStorage;
     private final FilmDbStorage filmStorage;
+    private final EventDbStorage eventStorage;
 
     public Review create(Review review) {
         if (review.getUserId() == 0) {
@@ -46,14 +49,26 @@ public class ReviewService {
                     "Film with id: %s not found",
                     review.getFilmId()));
         } else {
-            return reviewStorage.create(review);
+            Review createdReview = reviewStorage.create(review);
+            Event reviewEvent = new Event(createdReview.getUserId(), "REVIEW", "ADD");
+            reviewEvent.setEntityId(createdReview.getReviewId());
+            eventStorage.addEvent(reviewEvent);
+            return createdReview;
         }
     }
 
     public Review update(Review review) {
-        if (reviewStorage.update(review).isPresent()) {
+        int reviewId = review.getReviewId();
+        var updatedReview = reviewStorage.update(review);
+        if (updatedReview.isPresent()) {
+            int userId = reviewStorage.getReview(reviewId).get().getUserId();
+            Event reviewEvent = new Event(userId, "REVIEW", "UPDATE");
+            reviewEvent.setEntityId(updatedReview.get()
+                    .getReviewId());
+            eventStorage.addEvent(reviewEvent);
+
             log.info("Review updated");
-            return reviewStorage.update(review).get();
+            return updatedReview.get();
         } else {
             log.warn("Review not found");
             throw new NotFoundException(String.format(
@@ -100,10 +115,16 @@ public class ReviewService {
     }
 
     public void removeReview(int reviewId) {
-        if (reviewStorage.getReview(reviewId).isEmpty()) {
+        var reviewToDelete = reviewStorage.getReview(reviewId);
+        if (reviewToDelete.isEmpty()) {
             throw new NotFoundException(String.format(
                     "Review with id: %s not found", reviewId));
         } else {
+            Event reviewEvent = new Event(reviewToDelete.get().getUserId(), "REVIEW",
+                    "REMOVE");
+            reviewEvent.setEntityId(reviewId);
+            eventStorage.addEvent(reviewEvent);
+
             reviewStorage.removeReview(reviewId);
         }
     }

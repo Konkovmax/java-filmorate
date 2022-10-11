@@ -4,7 +4,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
+import ru.yandex.practicum.filmorate.model.Event;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.storage.EventDbStorage;
 import ru.yandex.practicum.filmorate.storage.UserDbStorage;
 import ru.yandex.practicum.filmorate.storage.FilmDbStorage;
 
@@ -17,13 +19,14 @@ import java.util.stream.Collectors;
 public class FilmService {
     private final FilmDbStorage filmStorage;
     private final UserDbStorage userStorage;
+    private final EventDbStorage eventStorage;
 
 
     @Autowired
-    public FilmService(FilmDbStorage filmStorage, UserDbStorage userStorage) {
+    public FilmService(FilmDbStorage filmStorage, UserDbStorage userStorage, EventDbStorage eventStorage) {
         this.filmStorage = filmStorage;
         this.userStorage = userStorage;
-
+        this.eventStorage = eventStorage;
     }
 
     public Film create(Film film) {
@@ -70,6 +73,9 @@ public class FilmService {
 
     public void addLike(int filmId, int userId) {
         filmStorage.addLike(filmId, userId);
+        Event likeEvent = new Event(userId, "LIKE", "ADD");
+        likeEvent.setEntityId(filmId);
+        eventStorage.addEvent(likeEvent);
     }
 
     public void removeLike(int filmId, int userId) {
@@ -80,6 +86,9 @@ public class FilmService {
                     userId));
         } else {
             filmStorage.removeLike(filmId, userId);
+            Event likeEvent = new Event(userId, "LIKE", "REMOVE");
+            likeEvent.setEntityId(filmId);
+            eventStorage.addEvent(likeEvent);
         }
     }
 
