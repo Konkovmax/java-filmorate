@@ -22,13 +22,13 @@ public class MpaDbStorage {
     }
 
     public List<Mpa> findMpa() {
-        String createQuery = "select * from MPA";
+        String createQuery = "SELECT * FROM mpa";
         return jdbcTemplate.query(createQuery, this::mapRowToMpa);
     }
 
     public Optional<Mpa> getMpa(int MpaId) {
         try {
-            String createQuery = "select * from MPA where MPAID = ?";
+            String createQuery = "SELECT * FROM mpa WHERE mpaid = ?";
             return Optional.of(jdbcTemplate.queryForObject(createQuery, this::mapRowToMpa, MpaId));
 
         } catch (EmptyResultDataAccessException e) {

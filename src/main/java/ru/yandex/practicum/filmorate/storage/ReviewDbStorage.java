@@ -25,8 +25,8 @@ public class ReviewDbStorage {
     }
 
     public Review create(Review review) {
-        String createQuery = "insert into reviews(Content, isPositive, filmId, userId) " +
-                "values (?, ?, ?, ?)";
+        String createQuery = "INSERT INTO reviews(content, ispositive, filmid, userid) " +
+                "VALUES (?, ?, ?, ?)";
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(connection -> {
             PreparedStatement stmt = connection.prepareStatement(createQuery, new String[]{"REVIEWID"});
@@ -43,8 +43,8 @@ public class ReviewDbStorage {
     }
 
     public Optional<Review> update(Review review) {
-        String createQuery = "update reviews set content = ?, ispositive = ?" +
-                " where reviewID = ?";
+        String createQuery = "UPDATE reviews SET content = ?, ispositive = ?" +
+                " WHERE reviewid = ?";
         int updateSuccess = jdbcTemplate.update(createQuery,
                 review.getContent(),
                 review.getIsPositive(),
@@ -57,16 +57,16 @@ public class ReviewDbStorage {
     }
 
     public List<Review> findAllReviews() {
-        String createQuery = "select * " +
-                "                 from reviews";
+        String createQuery = "SELECT * " +
+                "                 FROM reviews";
         return jdbcTemplate.query(createQuery, this::mapRowToReview);
     }
 
     public Optional<Review> getReview(int reviewId) {
         Review review;
-        String createQuery = "select * " +
-                " from reviews" +
-                " where reviewid = ?";
+        String createQuery = "SELECT * " +
+                " FROM reviews" +
+                " WHERE reviewid = ?";
         try {
             review = jdbcTemplate.queryForObject(createQuery, this::mapRowToReview, reviewId);
             return Optional.of(review);
@@ -78,22 +78,22 @@ public class ReviewDbStorage {
     }
 
     public List<Review> getFilmReviews(int filmId, int count) {
-        String createQuery = "select * " +
-                "from reviews " +
-                " where filmid = ? " +
-                "limit ?";
+        String createQuery = "SELECT * " +
+                "FROM reviews " +
+                " WHERE filmid = ? " +
+                "LIMIT ?";
         return jdbcTemplate.query(createQuery, this::mapRowToReview, filmId, count);
     }
 
     public void addReviewReaction(int reviewId, int userId, boolean isLike) {
-        String createQuery = "insert into review_scores(reviewid, userid, islike) " +
-                "values (?, ?, ?)";
+        String createQuery = "INSERT INTO review_scores(reviewid, userid, islike) " +
+                "VALUES (?, ?, ?)";
         jdbcTemplate.update(createQuery, reviewId, userId, isLike);
     }
 
     public void removeReviewReaction(int reviewId, int userId, boolean isLike) {
-        String createQuery = "DELETE FROM REVIEW_SCORES WHERE reviewid = ? and userid = ? " +
-                "and islike = ?";
+        String createQuery = "DELETE FROM review_scores WHERE reviewid = ? AND userid = ? " +
+                "AND islike = ?";
         jdbcTemplate.update(createQuery, reviewId, userId, isLike);
         log.info("Reaction removed");
     }
@@ -110,9 +110,9 @@ public class ReviewDbStorage {
 
     private int getReviewUseful(int reviewId) {
         int useful = 0;
-        String createQuery = "select count(reviewId) " +
-                "from review_scores " +
-                "where reviewid = ? and islike = ?";
+        String createQuery = "SELECT COUNT(reviewid) " +
+                "FROM review_scores " +
+                "WHERE reviewid = ? AND islike = ?";
         useful = jdbcTemplate.queryForObject(createQuery, Integer.class, reviewId, true);
         useful -= jdbcTemplate.queryForObject(createQuery, Integer.class, reviewId, false);
         return useful;
