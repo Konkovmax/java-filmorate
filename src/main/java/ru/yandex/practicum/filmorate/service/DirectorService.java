@@ -8,6 +8,7 @@ import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.storage.DirectorDbStorage;
 
 import java.util.List;
+
 @Slf4j
 @Service
 public class DirectorService {
@@ -18,7 +19,7 @@ public class DirectorService {
         this.directorStorage = directorStorage;
     }
 
-    public List<Director> findAllDirectors() {
+    public List<Director> findAll() {
         return directorStorage.findAll();
     }
 

@@ -101,7 +101,7 @@ public class ReviewService {
         }
     }
 
-    private Comparator<Review> comparator = Comparator.comparingInt(Review::getUseful).reversed();
+    private final Comparator<Review> comparator = Comparator.comparingInt(Review::getUseful).reversed();
 
     public List<Review> getAllReviews(int filmId, int count) {
         List<Review> reviews;
