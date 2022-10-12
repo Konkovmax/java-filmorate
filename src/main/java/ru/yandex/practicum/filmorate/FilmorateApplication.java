@@ -7,10 +7,10 @@ import java.time.format.DateTimeFormatter;
 
 @SpringBootApplication
 public class FilmorateApplication {
-	public static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    public static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
-	public static void main(String[] args) {
-		SpringApplication.run(FilmorateApplication.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(FilmorateApplication.class, args);
+    }
 
 }

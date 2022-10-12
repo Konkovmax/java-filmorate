@@ -19,7 +19,7 @@ public class DirectorController {
 
     @GetMapping("/directors")
     public List<Director> findAllDirectors() {
-        return directorService.findAllDirectors();
+        return directorService.findAll();
     }
 
     @GetMapping("/directors/{id}")
