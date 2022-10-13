@@ -57,8 +57,8 @@ public class UserService {
     }
 
     public User getUser(int userId) {
-        if (userStorage.getUser(userId).isPresent()) {
-            return userStorage.getUser(userId).get();
+        if (userStorage.getById(userId).isPresent()) {
+            return userStorage.getById(userId).get();
         } else {
             throw new NotFoundException(String.format(
                     "User with id: %s not found", userId));
@@ -86,7 +86,7 @@ public class UserService {
             userStorage.addFriend(userId, friendId);
             Event friendEvent = new Event(userId, "FRIEND", "ADD");
             friendEvent.setEntityId(friendId);
-            eventStorage.addEvent(friendEvent);
+            eventStorage.add(friendEvent);
         }
     }
 
@@ -99,7 +99,7 @@ public class UserService {
             userStorage.removeFriend(userId, friendId);
             Event friendEvent = new Event(userId, "FRIEND", "REMOVE");
             friendEvent.setEntityId(friendId);
-            eventStorage.addEvent(friendEvent);
+            eventStorage.add(friendEvent);
         }
     }
 

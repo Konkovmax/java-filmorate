@@ -43,7 +43,7 @@ public class ReviewService {
             throw new NotFoundException(String.format(
                     "User with id: %s not found",
                     review.getUserId()));
-        } else if (filmStorage.getFilm(review.getFilmId()).isEmpty()) {
+        } else if (filmStorage.getById(review.getFilmId()).isEmpty()) {
             log.warn("Film not found");
             throw new NotFoundException(String.format(
                     "Film with id: %s not found",
@@ -52,7 +52,7 @@ public class ReviewService {
             Review createdReview = reviewStorage.create(review);
             Event reviewEvent = new Event(createdReview.getUserId(), "REVIEW", "ADD");
             reviewEvent.setEntityId(createdReview.getReviewId());
-            eventStorage.addEvent(reviewEvent);
+            eventStorage.add(reviewEvent);
             return createdReview;
         }
     }
@@ -61,11 +61,11 @@ public class ReviewService {
         int reviewId = review.getReviewId();
         var updatedReview = reviewStorage.update(review);
         if (updatedReview.isPresent()) {
-            int userId = reviewStorage.getReview(reviewId).get().getUserId();
+            int userId = reviewStorage.getById(reviewId).get().getUserId();
             Event reviewEvent = new Event(userId, "REVIEW", "UPDATE");
             reviewEvent.setEntityId(updatedReview.get()
                     .getReviewId());
-            eventStorage.addEvent(reviewEvent);
+            eventStorage.add(reviewEvent);
 
             log.info("Review updated");
             return updatedReview.get();
@@ -77,7 +77,8 @@ public class ReviewService {
         }
     }
 
-    public Review getReview(int reviewId) {
+
+    public Review get(int reviewId) {
         return reviewStorage.getReview(reviewId)
                 .orElseThrow(() -> new NotFoundException("Not found review with id: " + reviewId));
 
@@ -101,7 +102,7 @@ public class ReviewService {
     public List<Review> getAllReviews(int filmId, int count) {
         List<Review> reviews;
         if (filmId == 0) {
-            reviews = reviewStorage.findAllReviews();
+            reviews = reviewStorage.findAll();
         } else {
             reviews = reviewStorage.getFilmReviews(filmId, count);
         }
@@ -110,7 +111,7 @@ public class ReviewService {
     }
 
     public void removeReview(int reviewId) {
-        var reviewToDelete = reviewStorage.getReview(reviewId);
+        var reviewToDelete = reviewStorage.getById(reviewId);
         if (reviewToDelete.isEmpty()) {
             throw new NotFoundException(String.format(
                     "Review with id: %s not found", reviewId));
@@ -118,7 +119,7 @@ public class ReviewService {
             Event reviewEvent = new Event(reviewToDelete.get().getUserId(), "REVIEW",
                     "REMOVE");
             reviewEvent.setEntityId(reviewId);
-            eventStorage.addEvent(reviewEvent);
+            eventStorage.add(reviewEvent);
 
             reviewStorage.removeReview(reviewId);
         }

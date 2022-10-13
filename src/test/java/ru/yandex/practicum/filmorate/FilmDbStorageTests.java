@@ -37,7 +37,7 @@ class FilmDbStorageTests {
 
     @Test
     public void testFindFilmById() {
-        Optional<Film> filmOptional = filmStorage.getFilm(1);
+        Optional<Film> filmOptional = filmStorage.getById(1);
         assertThat(filmOptional)
                 .isPresent()
                 .hasValueSatisfying(film ->
@@ -56,7 +56,7 @@ class FilmDbStorageTests {
         int filmId = 4;
         Film film = new Film(filmId, "Name", "login", "1989-02-01", 70, 4, "R");
         filmStorage.create(film);
-        Film savedFilm = filmStorage.getFilm(filmId).get();
+        Film savedFilm = filmStorage.getById(filmId).get();
         savedFilm.setId(filmId);
         assertEquals(film, savedFilm, "Films not equal");
     }
@@ -67,7 +67,7 @@ class FilmDbStorageTests {
 
         Film film = new Film(filmId, "Name", "login", "1989-02-01", 70, 4, "R");
         filmStorage.update(film);
-        Film savedFilm = filmStorage.getFilm(filmId).get();
+        Film savedFilm = filmStorage.getById(filmId).get();
         savedFilm.setId(filmId);
         assertEquals(film, savedFilm, "Films not equal");
     }
@@ -75,19 +75,19 @@ class FilmDbStorageTests {
 
     @Test
     public void testFindGenres() {
-        List<Genre> allGenres = genreStorage.findGenres();
+        List<Genre> allGenres = genreStorage.findAll();
         assertEquals(6, allGenres.size());
     }
 
     @Test
     public void testFindMpa() {
-        List<Mpa> allMpa = mpaStorage.findMpa();
+        List<Mpa> allMpa = mpaStorage.findAll();
         assertEquals(5, allMpa.size());
     }
 
     @Test
     public void testFindGenreById() {
-        Optional<Genre> filmOptional = genreStorage.getGenre(1);
+        Optional<Genre> filmOptional = genreStorage.getById(1);
         assertThat(filmOptional)
                 .isPresent()
                 .hasValueSatisfying(film ->
@@ -97,7 +97,7 @@ class FilmDbStorageTests {
 
     @Test
     public void testFindMpaById() {
-        Optional<Mpa> filmOptional = mpaStorage.getMpa(1);
+        Optional<Mpa> filmOptional = mpaStorage.getById(1);
         assertThat(filmOptional)
                 .isPresent()
                 .hasValueSatisfying(film ->

@@ -30,12 +30,12 @@ public class DirectorDbStorage {
         return jdbcTemplate.query(createQuery, new BeanPropertyRowMapper<>(Director.class));
     }
 
-    public List<Director> getDirector(int directorId) {
+    public List<Director> getById(int directorId) {
         String sql = "SELECT directorid AS id,name FROM director WHERE directorid=?";
         return jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(Director.class), directorId);
     }
 
-    public Director createDirector(Director director) {
+    public Director create(Director director) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
         String sql = "INSERT INTO director(name) VALUES (?)";
         jdbcTemplate.update(connection -> {
@@ -50,13 +50,15 @@ public class DirectorDbStorage {
         return director;
     }
 
-    public void upDateDirector(Director director) {
+    public void update(Director director) {
         String sql = "UPDATE director SET name=? WHERE directorid=? ";
         jdbcTemplate.update(sql, director.getName(), director.getId());
         log.info("Director updated");
     }
 
-    public void deleteDirector(int directorId) {
+
+    public void delete(int directorId) {
+
         //удаляем директора из таблицы директоров
         String sql2 = "DELETE FROM director WHERE directorid=?";
         jdbcTemplate.update(sql2, directorId);
@@ -74,7 +76,7 @@ public class DirectorDbStorage {
         jdbcTemplate.update(sql, film.getId());
         if (directors != null) {
             //проверяем есть ли в базе такие директоры
-            directors.forEach(director -> getDirector(director.getId()).stream().findFirst()
+            directors.forEach(director -> getById(director.getId()).stream().findFirst()
                     .orElseThrow(() -> new NotFoundException(String.format(
                             "Director with id: %s not found",
                             director.getId()))));
