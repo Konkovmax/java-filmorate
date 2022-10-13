@@ -64,9 +64,9 @@ public class FilmService {
         return filmStorage.findAll();
     }
 
-    public Film getFilm(int filmId) {
-        if (filmStorage.getFilm(filmId).isPresent()) {
-            return filmStorage.getFilm(filmId).get();
+    public Film getById(int filmId) {
+        if (filmStorage.getById(filmId).isPresent()) {
+            return filmStorage.getById(filmId).get();
         } else {
             throw new NotFoundException(String.format(
                     "Film with id: %s not found", filmId));
@@ -77,7 +77,7 @@ public class FilmService {
         filmStorage.addLike(filmId, userId);
         Event likeEvent = new Event(userId, "LIKE", "ADD");
         likeEvent.setEntityId(filmId);
-        eventStorage.addEvent(likeEvent);
+        eventStorage.add(likeEvent);
     }
 
     public void removeLike(int filmId, int userId) {
@@ -90,7 +90,7 @@ public class FilmService {
             filmStorage.removeLike(filmId, userId);
             Event likeEvent = new Event(userId, "LIKE", "REMOVE");
             likeEvent.setEntityId(filmId);
-            eventStorage.addEvent(likeEvent);
+            eventStorage.add(likeEvent);
         }
     }
 

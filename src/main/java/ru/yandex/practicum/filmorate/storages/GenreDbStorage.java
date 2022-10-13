@@ -21,12 +21,12 @@ public class GenreDbStorage {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    public List<Genre> findGenres() {
+    public List<Genre> findAll() {
         String createQuery = "SELECT * FROM genres";
         return jdbcTemplate.query(createQuery, this::mapRowToGenre);
     }
 
-    public Optional<Genre> getGenre(int genreId) {
+    public Optional<Genre> getById(int genreId) {
         try {
             String createQuery = "SELECT * FROM genres WHERE genreid = ?";
             return Optional.of(jdbcTemplate.queryForObject(createQuery, this::mapRowToGenre, genreId));

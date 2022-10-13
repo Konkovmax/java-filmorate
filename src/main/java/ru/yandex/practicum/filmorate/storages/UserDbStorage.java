@@ -58,7 +58,7 @@ public class UserDbStorage implements UserStorage {
         }
     }
 
-    public Optional<User> getUser(int userId) {
+    public Optional<User> getById(int userId) {
 
         try {
             String createQuery = "SELECT * FROM users WHERE userid = ?";
@@ -72,7 +72,7 @@ public class UserDbStorage implements UserStorage {
 
     public void delete(int userId) {
         String createQuery = "DELETE FROM users WHERE userid = ?";
-        var userToDelete = this.getUser(userId);
+        var userToDelete = this.getById(userId);
         if (userToDelete.isPresent()) {
             jdbcTemplate.update(createQuery, userId);
         } else {

@@ -13,15 +13,15 @@ import java.util.List;
 @Slf4j
 @RestController
 public class EventController {
-    private final EventService service;
+    private final EventService eventService;
 
     @Autowired
-    EventController(EventService service) {
-        this.service = service;
+    EventController(EventService eventService) {
+        this.eventService = eventService;
     }
 
     @GetMapping(value = "/users/{id}/feed")
-    public List<Event> getFeed(@PathVariable("id") int userId) {
-        return service.getAllEvents(userId);
+    public List<Event> getById(@PathVariable("id") int userId) {
+        return eventService.getById(userId);
     }
 }
