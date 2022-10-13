@@ -13,7 +13,7 @@ public interface UserStorage {
 
     Optional<User> update(User user);
 
-    Optional<User> getUser(int userId);
+    Optional<User> getById(int userId);
 
     void delete(int userId);
 
@@ -22,6 +22,10 @@ public interface UserStorage {
     void removeFriend(int userId, int friendId);
 
     List<User> getFriends(int userId);
+
+    int getUserIdFromDb(String login);
+
+    int userExistCheck(int id);
 
     List<User> getCommonFriends(int userId, int friendId);
 }

@@ -21,7 +21,7 @@ public class EventController {
     }
 
     @GetMapping(value = "/users/{id}/feed")
-    public List<Event> getFeed(@PathVariable("id") int userId) {
-        return service.getAllEvents(userId);
+    public List<Event> getById (@PathVariable("id") int userId) {
+        return service.getById(userId);
     }
 }

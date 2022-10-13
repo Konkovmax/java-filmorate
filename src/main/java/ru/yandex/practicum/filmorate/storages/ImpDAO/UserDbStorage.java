@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.storages;
+package ru.yandex.practicum.filmorate.storages.ImpDAO;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -6,9 +6,10 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.models.User;
+import ru.yandex.practicum.filmorate.storages.BasicMethods;
+import ru.yandex.practicum.filmorate.storages.UserStorage;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.List;
 import java.util.Optional;
 
@@ -22,11 +23,13 @@ public class UserDbStorage implements UserStorage {
         this.jdbcTemplate = jdbcTemplate;
     }
 
+    @Override
     public List<User> findAll() {
         String createQuery = "SELECT * FROM users";
         return jdbcTemplate.query(createQuery, this::mapRowToUser);
     }
 
+    @Override
     public User create(User user) {
 
         String createQuery = "INSERT INTO users(name, login, birthday, email) " +
@@ -39,7 +42,7 @@ public class UserDbStorage implements UserStorage {
         return user;
     }
 
-
+    @Override
     public Optional<User> update(User user) {
         String createQuery = "UPDATE users SET name = ?, login = ?, birthday = ?, email = ? WHERE userid = ?";
         int updateSuccess = jdbcTemplate.update(createQuery,
@@ -58,7 +61,8 @@ public class UserDbStorage implements UserStorage {
         }
     }
 
-    public Optional<User> getUser(int userId) {
+    @Override
+    public Optional<User> getById(int userId) {
 
         try {
             String createQuery = "SELECT * FROM users WHERE userid = ?";
@@ -69,10 +73,10 @@ public class UserDbStorage implements UserStorage {
         }
 
     }
-
+    @Override
     public void delete(int userId) {
         String createQuery = "DELETE FROM users WHERE userid = ?";
-        var userToDelete = this.getUser(userId);
+        var userToDelete = this.getById(userId);
         if (userToDelete.isPresent()) {
             jdbcTemplate.update(createQuery, userId);
         } else {
@@ -90,6 +94,7 @@ public class UserDbStorage implements UserStorage {
                 resultSet.getString("email"));
     }
 
+    @Override
     public int getUserIdFromDb(String login) {
         String createQuery = "SELECT * FROM users WHERE login = ?";
         try {
@@ -99,6 +104,7 @@ public class UserDbStorage implements UserStorage {
         }
     }
 
+    @Override
     public int userExistCheck(int id) {
         String createQuery = "SELECT * FROM users WHERE userid = ?";
         try {
@@ -108,6 +114,7 @@ public class UserDbStorage implements UserStorage {
         }
     }
 
+    @Override
     public List<User> getCommonFriends(int userId, int friendId) {
         String createQuery = "SELECT u.* " +
                 "FROM friends AS f1 " +
@@ -119,16 +126,16 @@ public class UserDbStorage implements UserStorage {
         return jdbcTemplate.query(createQuery, this::mapRowToUser, userId, friendId);
     }
 
+    @Override
     public void addFriend(int userId, int friendId) {
 
         String createQuery = "INSERT INTO friends(userid, friendid, status) " +
                 "VALUES (?, ?, ?)";
-        jdbcTemplate.update(createQuery,
-                userId, friendId, false);
+        jdbcTemplate.update(createQuery, userId, friendId, false);
         log.info("Friend added");
 
     }
-
+    @Override
     public List<User> getFriends(int userId) {
         String createQuery = "SELECT u.* " +
                 "FROM friends AS f1 " +
@@ -136,7 +143,7 @@ public class UserDbStorage implements UserStorage {
                 "WHERE f1.userid = ?";
         return jdbcTemplate.query(createQuery, this::mapRowToUser, userId);
     }
-
+    @Override
     public void removeFriend(int userId, int friendId) {
         String createQuery = "DELETE FROM friends WHERE userid = ? AND friendid = ?";
         jdbcTemplate.update(createQuery, userId, friendId);

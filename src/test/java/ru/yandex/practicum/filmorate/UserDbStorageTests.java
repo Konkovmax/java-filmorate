@@ -7,7 +7,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.jdbc.Sql;
 import ru.yandex.practicum.filmorate.models.User;
-import ru.yandex.practicum.filmorate.storages.UserDbStorage;
+import ru.yandex.practicum.filmorate.storages.ImpDAO.UserDbStorage;
 
 import java.util.List;
 import java.util.Optional;
@@ -25,7 +25,7 @@ class UserDbStorageTests {
 
     @Test
     public void testFindUserById() {
-        Optional<User> userOptional = userStorage.getUser(1);
+        Optional<User> userOptional = userStorage.getById(1);
         assertThat(userOptional)
                 .isPresent()
                 .hasValueSatisfying(user ->
@@ -45,7 +45,7 @@ class UserDbStorageTests {
 
         User user = new User(userId, "Name", "login", "1989-02-01", "email@email.ru");
         userStorage.create(user);
-        User savedUser = userStorage.getUser(userId).get();
+        User savedUser = userStorage.getById(userId).get();
         savedUser.setId(userId);
         assertEquals(user, savedUser, "Users not equal");
     }
@@ -56,7 +56,7 @@ class UserDbStorageTests {
 
         User user = new User(userId, "Name", "login", "1989-02-01", "email@email.ru");
         userStorage.update(user);
-        User savedUser = userStorage.getUser(userId).get();
+        User savedUser = userStorage.getById(userId).get();
         savedUser.setId(userId);
         assertEquals(user, savedUser, "Users not equal");
     }

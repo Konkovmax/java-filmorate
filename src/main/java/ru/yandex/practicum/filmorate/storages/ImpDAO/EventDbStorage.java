@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.storages;
+package ru.yandex.practicum.filmorate.storages.ImpDAO;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -6,6 +6,7 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.models.Event;
+import ru.yandex.practicum.filmorate.storages.EventStorage;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -23,7 +24,7 @@ public class EventDbStorage implements EventStorage {
     }
 
     @Override
-    public void addEvent(Event event) {
+    public void create(Event event) {
         if (event == null) {
             return;
         }
@@ -59,7 +60,7 @@ public class EventDbStorage implements EventStorage {
     }
 
     @Override
-    public List<Event> getAllEvents(int userId) {
+    public List<Event> getById(int userId) {
         String sql = "SELECT e.eventid, e.userid, e.timestamp, et.eventtype, op.operation, el.filmid AS filmid, " +
                 "       er.reviewid AS reviewid, ef.friendid AS friendid " +
                 "FROM events AS e " +

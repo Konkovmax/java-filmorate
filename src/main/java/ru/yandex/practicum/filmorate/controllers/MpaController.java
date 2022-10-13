@@ -19,12 +19,12 @@ public class MpaController {
     }
 
     @GetMapping("/mpa")
-    public List<Mpa> findMpa() {
-        return mpaService.findMpa();
+    public List<Mpa> findAll() {
+        return mpaService.findAll();
     }
 
     @GetMapping("/mpa/{id}")
-    public Mpa getMpa(@PathVariable("id") Integer mpaId) {
-        return mpaService.getMpa(mpaId);
+    public Mpa findById(@PathVariable("id") Integer mpaId) {
+        return mpaService.getById(mpaId);
     }
 }

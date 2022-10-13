@@ -1,10 +1,13 @@
-package ru.yandex.practicum.filmorate.storages;
+package ru.yandex.practicum.filmorate.storages.ImpDAO;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.models.Film;
 import ru.yandex.practicum.filmorate.models.Genre;
+import ru.yandex.practicum.filmorate.storages.BasicMethods;
+import ru.yandex.practicum.filmorate.storages.GenreStorage;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -13,7 +16,7 @@ import java.util.Optional;
 
 @Slf4j
 @Component
-public class GenreDbStorage {
+public class GenreDbStorage implements GenreStorage {
 
     private final JdbcTemplate jdbcTemplate;
 
@@ -21,12 +24,14 @@ public class GenreDbStorage {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    public List<Genre> findGenres() {
+    @Override
+    public List<Genre> findAll() {
         String createQuery = "SELECT * FROM genres";
         return jdbcTemplate.query(createQuery, this::mapRowToGenre);
     }
 
-    public Optional<Genre> getGenre(int genreId) {
+    @Override
+    public Optional<Genre> getById(int genreId) {
         try {
             String createQuery = "SELECT * FROM genres WHERE genreid = ?";
             return Optional.of(jdbcTemplate.queryForObject(createQuery, this::mapRowToGenre, genreId));
@@ -37,6 +42,7 @@ public class GenreDbStorage {
         }
     }
 
+    @Override
     public List<Genre> getFilmsGenre(int filmId) {
         String createQuery = "SELECT g.* " +
                 " FROM genres g" +

@@ -7,9 +7,12 @@ import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.models.Event;
 import ru.yandex.practicum.filmorate.models.Film;
 import ru.yandex.practicum.filmorate.models.Genre;
-import ru.yandex.practicum.filmorate.storages.EventDbStorage;
-import ru.yandex.practicum.filmorate.storages.FilmDbStorage;
-import ru.yandex.practicum.filmorate.storages.UserDbStorage;
+import ru.yandex.practicum.filmorate.storages.EventStorage;
+import ru.yandex.practicum.filmorate.storages.FilmStorage;
+import ru.yandex.practicum.filmorate.storages.ImpDAO.EventDbStorage;
+import ru.yandex.practicum.filmorate.storages.ImpDAO.FilmDbStorage;
+import ru.yandex.practicum.filmorate.storages.ImpDAO.UserDbStorage;
+import ru.yandex.practicum.filmorate.storages.UserStorage;
 
 import java.util.Arrays;
 import java.util.List;
@@ -18,9 +21,9 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 public class FilmService {
-    private final FilmDbStorage filmStorage;
-    private final UserDbStorage userStorage;
-    private final EventDbStorage eventStorage;
+    private final FilmStorage filmStorage;
+    private final UserStorage userStorage;
+    private final EventStorage eventStorage;
 
 
     @Autowired
@@ -64,9 +67,9 @@ public class FilmService {
         return filmStorage.findAll();
     }
 
-    public Film getFilm(int filmId) {
-        if (filmStorage.getFilm(filmId).isPresent()) {
-            return filmStorage.getFilm(filmId).get();
+    public Film getById (int filmId) {
+        if (filmStorage.getById(filmId).isPresent()) {
+            return filmStorage.getById(filmId).get();
         } else {
             throw new NotFoundException(String.format(
                     "Film with id: %s not found", filmId));
@@ -77,7 +80,7 @@ public class FilmService {
         filmStorage.addLike(filmId, userId);
         Event likeEvent = new Event(userId, "LIKE", "ADD");
         likeEvent.setEntityId(filmId);
-        eventStorage.addEvent(likeEvent);
+        eventStorage.create(likeEvent);
     }
 
     public void removeLike(int filmId, int userId) {
@@ -90,7 +93,7 @@ public class FilmService {
             filmStorage.removeLike(filmId, userId);
             Event likeEvent = new Event(userId, "LIKE", "REMOVE");
             likeEvent.setEntityId(filmId);
-            eventStorage.addEvent(likeEvent);
+            eventStorage.create(likeEvent);
         }
     }
 
@@ -108,7 +111,6 @@ public class FilmService {
             return filmStorage.getPopularByGenreAndYear(year, genreId, count);
         }
     }
-
 
     public List<Film> getCommonFilms(Long userId, Long friendId) {
         return getSortedFilms(filmStorage.getCommonFilms(userId, friendId));

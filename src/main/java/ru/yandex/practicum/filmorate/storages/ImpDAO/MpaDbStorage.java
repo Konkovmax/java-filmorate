@@ -1,10 +1,11 @@
-package ru.yandex.practicum.filmorate.storages;
+package ru.yandex.practicum.filmorate.storages.ImpDAO;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.models.Mpa;
+import ru.yandex.practicum.filmorate.storages.MpaStorage;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -13,7 +14,7 @@ import java.util.Optional;
 
 @Slf4j
 @Component
-public class MpaDbStorage {
+public class MpaDbStorage implements MpaStorage {
 
     private final JdbcTemplate jdbcTemplate;
 
@@ -21,12 +22,14 @@ public class MpaDbStorage {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    public List<Mpa> findMpa() {
+    @Override
+    public List<Mpa> findAll() {
         String createQuery = "SELECT * FROM mpa";
         return jdbcTemplate.query(createQuery, this::mapRowToMpa);
     }
 
-    public Optional<Mpa> getMpa(int MpaId) {
+    @Override
+    public Optional<Mpa> getById(int MpaId) {
         try {
             String createQuery = "SELECT * FROM mpa WHERE mpaid = ?";
             return Optional.of(jdbcTemplate.queryForObject(createQuery, this::mapRowToMpa, MpaId));
