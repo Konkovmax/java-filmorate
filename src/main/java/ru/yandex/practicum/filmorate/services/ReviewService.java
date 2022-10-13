@@ -73,7 +73,7 @@ public class ReviewService {
             log.warn("Review not found");
             throw new NotFoundException(String.format(
                     "Review with id: %s not found",
-                    review.getReviewId()));
+                    review.getReviewId() ));
         }
     }
 
