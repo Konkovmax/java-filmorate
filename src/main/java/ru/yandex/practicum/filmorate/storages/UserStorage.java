@@ -5,9 +5,10 @@ import ru.yandex.practicum.filmorate.models.User;
 import java.util.List;
 import java.util.Optional;
 
+
 public interface UserStorage extends BasicStorage<User>{
 
-    void addFriend(int userId, int friendId);
+void addFriend(int userId, int friendId);
 
     void removeFriend(int userId, int friendId);
 

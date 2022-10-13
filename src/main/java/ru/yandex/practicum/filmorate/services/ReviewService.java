@@ -7,10 +7,12 @@ import ru.yandex.practicum.filmorate.exceptions.BadRequestException;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.models.Event;
 import ru.yandex.practicum.filmorate.models.Review;
+
 import ru.yandex.practicum.filmorate.storages.EventStorage;
 import ru.yandex.practicum.filmorate.storages.FilmStorage;
 import ru.yandex.practicum.filmorate.storages.ReviewStorage;
 import ru.yandex.practicum.filmorate.storages.UserStorage;
+
 
 import java.util.Collections;
 import java.util.Comparator;
@@ -24,6 +26,7 @@ public class ReviewService {
     private final UserStorage userStorage;
     private final FilmStorage filmStorage;
     private final EventStorage eventStorage;
+
 
     public Review create(Review review) {
         if (review.getUserId() == 0) {
@@ -124,7 +127,6 @@ public class ReviewService {
                     "REMOVE");
             reviewEvent.setEntityId(reviewId);
             eventStorage.create(reviewEvent);
-
             reviewStorage.delete(reviewId);
         }
     }

@@ -17,6 +17,7 @@ import java.util.List;
 
 @Slf4j
 @Service
+
 public class UserService extends BasicService<User> {
     private final UserStorage userStorage;
     private final EventStorage eventStorage;
@@ -42,6 +43,7 @@ public class UserService extends BasicService<User> {
             return user;
         }
     }
+
 
     public void addFriend(int userId, int friendId) {
 

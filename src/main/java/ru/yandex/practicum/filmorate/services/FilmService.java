@@ -7,6 +7,7 @@ import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.models.Event;
 import ru.yandex.practicum.filmorate.models.Film;
 import ru.yandex.practicum.filmorate.models.Genre;
+
 import ru.yandex.practicum.filmorate.storages.EventStorage;
 import ru.yandex.practicum.filmorate.storages.FilmStorage;
 import ru.yandex.practicum.filmorate.storages.ImpDAO.EventDbStorage;
@@ -20,11 +21,11 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Service
+
 public class FilmService extends BasicService<Film> {
     private final FilmStorage filmStorage;
     private final UserStorage userStorage;
     private final EventStorage eventStorage;
-
 
     @Autowired
     public FilmService(FilmDbStorage filmStorage, UserDbStorage userStorage, EventDbStorage eventStorage) {
@@ -44,6 +45,7 @@ public class FilmService extends BasicService<Film> {
         }
         return super.update(film);
     }
+
     public void addLike(int filmId, int userId) {
         filmStorage.addLike(filmId, userId);
         Event likeEvent = new Event(userId, "LIKE", "ADD");
@@ -106,6 +108,5 @@ public class FilmService extends BasicService<Film> {
         String[] items = params.split(",");
         List<String> searchParam = Arrays.asList(items);
         return getSortedFilms(filmStorage.search(query, searchParam));
-
     }
 }

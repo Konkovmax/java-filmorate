@@ -13,6 +13,7 @@ import java.util.List;
 @Slf4j
 @RestController
 public class EventController {
+
     private final EventService service;
 
     @Autowired

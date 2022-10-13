@@ -6,7 +6,6 @@ import java.util.List;
 
 public interface EventStorage {
 
-
     void create(Event event);
 
     List<Event> getById(int userId);

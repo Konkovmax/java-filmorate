@@ -41,6 +41,7 @@ public class FilmController {
     }
 
     @GetMapping("/films/{id}")
+
     public Film getById(@PathVariable("id") Integer filmId) {
         return filmService.getById(filmId);
     }

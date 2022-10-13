@@ -7,12 +7,14 @@ import ru.yandex.practicum.filmorate.models.Event;
 import ru.yandex.practicum.filmorate.storages.EventStorage;
 import ru.yandex.practicum.filmorate.storages.ImpDAO.EventDbStorage;
 
+
 import java.util.List;
 
 @Slf4j
 @Service
 public class EventService {
-    private final EventStorage eventStorage;
+
+private final EventStorage eventStorage;
 
     @Autowired
     EventService(EventDbStorage eventStorage) {

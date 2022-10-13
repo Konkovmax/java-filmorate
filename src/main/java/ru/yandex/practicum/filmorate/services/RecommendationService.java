@@ -6,6 +6,7 @@ import ru.yandex.practicum.filmorate.models.Film;
 import ru.yandex.practicum.filmorate.storages.ImpDAO.RecommendationDBStorage;
 import ru.yandex.practicum.filmorate.storages.RecommendationStorage;
 
+
 import java.util.List;
 
 @Service
@@ -16,5 +17,6 @@ public class RecommendationService {
 
     public List<Film> recommendations(int userId) {
         return recommendationStorage.getAll(userId);
+
     }
 }
