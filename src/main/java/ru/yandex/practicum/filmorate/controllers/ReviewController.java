@@ -3,8 +3,8 @@ package ru.yandex.practicum.filmorate.controllers;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.model.Review;
-import ru.yandex.practicum.filmorate.service.ReviewService;
+import ru.yandex.practicum.filmorate.models.Review;
+import ru.yandex.practicum.filmorate.services.ReviewService;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -30,19 +30,20 @@ public class ReviewController {
     }
 
     @DeleteMapping("/reviews/{id}")
-    public void removeReview(@PathVariable("id") Integer reviewId) {
-        reviewService.removeReview(reviewId);
+    public void removeById(@PathVariable("id") Integer reviewId) {
+        reviewService.delete(reviewId);
     }
 
     @GetMapping("/reviews/{id}")
-    public Review getReview(@PathVariable("id") Integer reviewId) {
-        return reviewService.getReview(reviewId);
+    public Review getById(@PathVariable("id") Integer reviewId) {
+        return reviewService.getById(reviewId);
     }
 
     @GetMapping("/reviews")
-    public List<Review> getAllReviews(@RequestParam(value = "filmId", defaultValue = "0", required = false) Integer filmId,
-                                      @RequestParam(value = "count", defaultValue = "10", required = false) Integer count) {
-        return reviewService.getAllReviews(filmId, count);
+    public List<Review> getAll(
+            @RequestParam(value = "filmId", defaultValue = "0", required = false) Integer filmId,
+            @RequestParam(value = "count", defaultValue = "10", required = false) Integer count) {
+        return reviewService.getAll(filmId, count);
     }
 
     @PutMapping(value = "/reviews/{id}/like/{userId}")
