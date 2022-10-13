@@ -78,12 +78,9 @@ public class ReviewService {
     }
 
     public Review getReview(int reviewId) {
-        if (reviewStorage.getReview(reviewId).isPresent()) {
-            return reviewStorage.getReview(reviewId).get();
-        } else {
-            throw new NotFoundException(String.format(
-                    "Review with id: %s not found", reviewId));
-        }
+        return reviewStorage.getReview(reviewId)
+                .orElseThrow(() -> new NotFoundException("Not found review with id: " + reviewId));
+
     }
 
     public void addReviewReaction(int reviewId, int userId, boolean isLike) {
@@ -100,8 +97,6 @@ public class ReviewService {
             reviewStorage.removeReviewReaction(reviewId, userId, isLike);
         }
     }
-
-    private final Comparator<Review> comparator = Comparator.comparingInt(Review::getUseful).reversed();
 
     public List<Review> getAllReviews(int filmId, int count) {
         List<Review> reviews;
@@ -128,4 +123,6 @@ public class ReviewService {
             reviewStorage.removeReview(reviewId);
         }
     }
+
+    private final Comparator<Review> comparator = Comparator.comparingInt(Review::getUseful).reversed();
 }

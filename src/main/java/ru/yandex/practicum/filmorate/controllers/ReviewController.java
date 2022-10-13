@@ -30,17 +30,17 @@ public class ReviewController {
     }
 
     @DeleteMapping("/reviews/{id}")
-    public void removeReview(@PathVariable("id") Integer reviewId) {
+    public void delete(@PathVariable("id") Integer reviewId) {
         reviewService.removeReview(reviewId);
     }
 
     @GetMapping("/reviews/{id}")
-    public Review getReview(@PathVariable("id") Integer reviewId) {
+    public Review get(@PathVariable("id") Integer reviewId) {
         return reviewService.getReview(reviewId);
     }
 
     @GetMapping("/reviews")
-    public List<Review> getAllReviews(
+    public List<Review> getAll(
             @RequestParam(value = "filmId", defaultValue = "0", required = false) Integer filmId,
             @RequestParam(value = "count", defaultValue = "10", required = false) Integer count) {
         return reviewService.getAllReviews(filmId, count);

@@ -57,9 +57,6 @@ public class DirectorDbStorage {
     }
 
     public void deleteDirector(int directorId) {
-        //удаляем директора из таблицы фильм-директор
-        String sql = "DELETE FROM films_directors WHERE directorid=?";
-        jdbcTemplate.update(sql, directorId);
         //удаляем директора из таблицы директоров
         String sql2 = "DELETE FROM director WHERE directorid=?";
         jdbcTemplate.update(sql2, directorId);
