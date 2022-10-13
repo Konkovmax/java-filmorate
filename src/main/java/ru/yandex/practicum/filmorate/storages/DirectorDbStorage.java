@@ -30,7 +30,7 @@ public class DirectorDbStorage {
         return jdbcTemplate.query(createQuery, new BeanPropertyRowMapper<>(Director.class));
     }
 
-    public List<Director> get(int directorId) {
+    public List<Director> getById(int directorId) {
         String sql = "SELECT directorid AS id,name FROM director WHERE directorid=?";
         return jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(Director.class), directorId);
     }
@@ -74,7 +74,7 @@ public class DirectorDbStorage {
         jdbcTemplate.update(sql, film.getId());
         if (directors != null) {
             //проверяем есть ли в базе такие директоры
-            directors.forEach(director -> get(director.getId()).stream().findFirst()
+            directors.forEach(director -> getById(director.getId()).stream().findFirst()
                     .orElseThrow(() -> new NotFoundException(String.format(
                             "Director with id: %s not found",
                             director.getId()))));

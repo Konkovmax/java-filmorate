@@ -101,7 +101,7 @@ public class FilmDbStorage implements FilmStorage {
         return jdbcTemplate.query(createQuery, this::mapRowToFilm);
     }
 
-    public Optional<Film> getFilm(int filmId) {
+    public Optional<Film> getById(int filmId) {
         String createQuery = "SELECT f.*, r.mpa AS mpaname " +
                 "FROM films f " +
                 "JOIN mpa r ON r.mpaid = f.mpaid WHERE f.filmid = ?";
@@ -114,7 +114,7 @@ public class FilmDbStorage implements FilmStorage {
 
     public boolean delete(int filmId) {
         String createQuery = "DELETE FROM films WHERE filmid = ?";
-        var filmToDelete = this.getFilm(filmId);
+        var filmToDelete = this.getById(filmId);
         if (filmToDelete.isPresent()) {
             jdbcTemplate.update(createQuery, filmId);
             return true;
@@ -153,7 +153,7 @@ public class FilmDbStorage implements FilmStorage {
 
     public List<Film> getFilmsDirectorSortedByLike(int directorId) {
         //проверили, существует ли такой режжисер
-        if (!directorStorage.get(directorId).isEmpty()) {
+        if (!directorStorage.getById(directorId).isEmpty()) {
             String sql = "SELECT f.*,r.mpa AS mpaname FROM films AS f  JOIN films_directors AS fd ON f.filmid = fd.filmid" +
                     " LEFT JOIN  likes l ON f.filmid = l.filmid LEFT JOIN mpa r ON f.mpaid = r.mpaid WHERE directorid=?" +
                     " GROUP BY f.filmid ORDER BY COUNT(usersid) DESC";
@@ -168,7 +168,7 @@ public class FilmDbStorage implements FilmStorage {
 
     public List<Film> getFilmsDirectorSortedByYears(int directorId) {
         //проверили, существует ли такой режжисер
-        if (!directorStorage.get(directorId).isEmpty()) {
+        if (!directorStorage.getById(directorId).isEmpty()) {
             String sql = "SELECT f.*,r.mpa AS mpaname FROM films AS f  JOIN films_directors AS fd ON f.filmid = fd.filmid" +
                     " LEFT JOIN mpa r ON f.mpaid = r.mpaid WHERE directorid=? " +
                     "ORDER BY EXTRACT(YEAR FROM CAST(releasedate AS date) )";

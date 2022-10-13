@@ -18,13 +18,13 @@ public class DirectorController {
     }
 
     @GetMapping("/directors")
-    public List<Director> findAllDirectors() {
+    public List<Director> findAll() {
         return directorService.findAll();
     }
 
     @GetMapping("/directors/{id}")
     public Director getDirector(@PathVariable int id) {
-        return directorService.get(id);
+        return directorService.getById(id);
     }
 
     @PostMapping("/directors")

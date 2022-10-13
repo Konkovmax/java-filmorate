@@ -62,7 +62,7 @@ public class ReviewDbStorage {
         return jdbcTemplate.query(createQuery, this::mapRowToReview);
     }
 
-    public Optional<Review> get(int reviewId) {
+    public Optional<Review> getById(int reviewId) {
         Review review;
         String createQuery = "SELECT * " +
                 " FROM reviews" +

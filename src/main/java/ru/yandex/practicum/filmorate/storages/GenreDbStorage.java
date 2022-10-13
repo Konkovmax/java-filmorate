@@ -26,7 +26,7 @@ public class GenreDbStorage {
         return jdbcTemplate.query(createQuery, this::mapRowToGenre);
     }
 
-    public Optional<Genre> get(int genreId) {
+    public Optional<Genre> getById(int genreId) {
         try {
             String createQuery = "SELECT * FROM genres WHERE genreid = ?";
             return Optional.of(jdbcTemplate.queryForObject(createQuery, this::mapRowToGenre, genreId));

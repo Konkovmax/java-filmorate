@@ -26,7 +26,7 @@ public class MpaDbStorage {
         return jdbcTemplate.query(createQuery, this::mapRowToMpa);
     }
 
-    public Optional<Mpa> get(int MpaId) {
+    public Optional<Mpa> getById(int MpaId) {
         try {
             String createQuery = "SELECT * FROM mpa WHERE mpaid = ?";
             return Optional.of(jdbcTemplate.queryForObject(createQuery, this::mapRowToMpa, MpaId));

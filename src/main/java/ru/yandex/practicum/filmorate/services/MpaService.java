@@ -21,9 +21,9 @@ public class MpaService {
         return mpaDbStorage.findAll();
     }
 
-    public Mpa get(int mpaId) {
-        if (mpaDbStorage.get(mpaId).isPresent()) {
-            return mpaDbStorage.get(mpaId).get();
+    public Mpa getById(int mpaId) {
+        if (mpaDbStorage.getById(mpaId).isPresent()) {
+            return mpaDbStorage.getById(mpaId).get();
         } else {
 
             throw new NotFoundException(String.format(

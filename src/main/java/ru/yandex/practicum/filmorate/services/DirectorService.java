@@ -23,8 +23,8 @@ public class DirectorService {
         return directorStorage.findAll();
     }
 
-    public Director get(int directorId) {
-        return directorStorage.get(directorId).stream().findFirst()
+    public Director getById(int directorId) {
+        return directorStorage.getById(directorId).stream().findFirst()
                 .orElseThrow(() -> new NotFoundException(String.format(
                         "Director with id: %s not found",
                         directorId)));
@@ -35,13 +35,13 @@ public class DirectorService {
     }
 
     public Director update(Director director) {
-        get(director.getId());
+        getById(director.getId());
         directorStorage.update(director);
-        return get(director.getId());
+        return getById(director.getId());
     }
 
     public void deleteDirector(int directorId) {
-        get(directorId);
+        getById(directorId);
         directorStorage.delete(directorId);
     }
 }

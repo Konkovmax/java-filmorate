@@ -21,9 +21,9 @@ public class GenreService {
         return genreStorage.findAll();
     }
 
-    public Genre getGenre(int genreId) {
-        if (genreStorage.get(genreId).isPresent()) {
-            return genreStorage.get(genreId).get();
+    public Genre getById(int genreId) {
+        if (genreStorage.getById(genreId).isPresent()) {
+            return genreStorage.getById(genreId).get();
         } else {
             throw new NotFoundException(String.format(
                     "Genre with id: %s not found", genreId));

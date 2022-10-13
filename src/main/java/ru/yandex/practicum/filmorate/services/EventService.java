@@ -18,7 +18,7 @@ public class EventService {
         this.eventStorage = eventStorage;
     }
 
-    public List<Event> getAll(int userId) {
-        return eventStorage.getAll(userId);
+    public List<Event> getById(int userId) {
+        return eventStorage.getById(userId);
     }
 }
