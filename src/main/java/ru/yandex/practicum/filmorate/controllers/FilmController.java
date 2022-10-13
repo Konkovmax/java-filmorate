@@ -4,8 +4,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exceptions.BadRequestException;
-import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.service.FilmService;
+import ru.yandex.practicum.filmorate.models.Film;
+import ru.yandex.practicum.filmorate.services.FilmService;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -31,7 +31,9 @@ public class FilmController {
     }
 
     @DeleteMapping(value = "/films/{id}")
-    public void delete(@PathVariable("id") Integer filmId) { filmService.delete(filmId); }
+    public void delete(@PathVariable("id") Integer filmId) {
+        filmService.delete(filmId);
+    }
 
     @GetMapping("/films")
     public List<Film> findAll() {
@@ -39,16 +41,14 @@ public class FilmController {
     }
 
     @GetMapping("/films/{id}")
-    public Film getFilm(@PathVariable("id") Integer filmId) {
-        return filmService.getFilm(filmId);
+    public Film getById(@PathVariable("id") Integer filmId) {
+        return filmService.getById(filmId);
     }
 
     @GetMapping("/films/popular")
     public List<Film> getPopular(@RequestParam(value = "genreId", required = false) Integer genreId,
-                                 @RequestParam(value = "count", defaultValue = "10", required = false)
-                                 int count,
-                                 @RequestParam(value = "year", required = false)
-                                     Integer year) {
+                                 @RequestParam(value = "count", defaultValue = "10", required = false) int count,
+                                 @RequestParam(value = "year", required = false) Integer year) {
         return filmService.getPopular(year, genreId, count);
     }
 
@@ -70,15 +70,15 @@ public class FilmController {
 
     @GetMapping("/films/common")
     public List<Film> getCommonFilms(@RequestParam(value = "userId", required = true) long userId,
-                             @RequestParam(value = "friendId", required = true) long friendId) {
+                                     @RequestParam(value = "friendId", required = true) long friendId) {
         return filmService.getCommonFilms(userId, friendId);
     }
 
     @GetMapping("/films/director/{directorId}")
     public List<Film> getDirectorFilms(@PathVariable int directorId, @RequestParam String sortBy) {
-        if (sortBy.equals("year")) {
+        if ("year".equals(sortBy)) {
             return filmService.getFilmsDirectorSortedByYears(directorId);
-        } else if (sortBy.equals("likes")) {
+        } else if ("likes".equals(sortBy)) {
             return filmService.getFilmsDirectorSortedByLike(directorId);
         } else {
             throw new BadRequestException("Bad Request. Please repeat by correct sortBy");
