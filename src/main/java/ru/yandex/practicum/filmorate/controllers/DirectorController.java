@@ -2,8 +2,8 @@ package ru.yandex.practicum.filmorate.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.model.Director;
-import ru.yandex.practicum.filmorate.service.DirectorService;
+import ru.yandex.practicum.filmorate.models.Director;
+import ru.yandex.practicum.filmorate.services.DirectorService;
 
 import javax.validation.Valid;
 import java.util.List;
