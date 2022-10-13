@@ -24,17 +24,17 @@ public class DirectorController {
 
     @GetMapping("/directors/{id}")
     public Director getDirector(@PathVariable int id) {
-        return directorService.getDirector(id);
+        return directorService.get(id);
     }
 
     @PostMapping("/directors")
     public Director createDirector(@RequestBody @Valid Director director) {
-        return directorService.createDirector(director);
+        return directorService.create(director);
     }
 
     @PutMapping("/directors")
     public Director upDateDirector(@RequestBody @Valid Director director) {
-        return directorService.upDateDirector(director);
+        return directorService.update(director);
     }
 
     @DeleteMapping("/directors/{id}")

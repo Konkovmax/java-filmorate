@@ -17,13 +17,13 @@ public class GenreService {
         this.genreStorage = genreStorage;
     }
 
-    public List<Genre> findGenres() {
-        return genreStorage.findGenres();
+    public List<Genre> findAll() {
+        return genreStorage.findAll();
     }
 
     public Genre getGenre(int genreId) {
-        if (genreStorage.getGenre(genreId).isPresent()) {
-            return genreStorage.getGenre(genreId).get();
+        if (genreStorage.get(genreId).isPresent()) {
+            return genreStorage.get(genreId).get();
         } else {
             throw new NotFoundException(String.format(
                     "Genre with id: %s not found", genreId));

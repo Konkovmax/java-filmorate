@@ -59,7 +59,7 @@ public class EventDbStorage implements EventStorage {
     }
 
     @Override
-    public List<Event> getAllEvents(int userId) {
+    public List<Event> getAll(int userId) {
         String sql = "SELECT e.eventid, e.userid, e.timestamp, et.eventtype, op.operation, el.filmid AS filmid, " +
                 "       er.reviewid AS reviewid, ef.friendid AS friendid " +
                 "FROM events AS e " +

@@ -153,7 +153,7 @@ public class FilmDbStorage implements FilmStorage {
 
     public List<Film> getFilmsDirectorSortedByLike(int directorId) {
         //проверили, существует ли такой режжисер
-        if (!directorStorage.getDirector(directorId).isEmpty()) {
+        if (!directorStorage.get(directorId).isEmpty()) {
             String sql = "SELECT f.*,r.mpa AS mpaname FROM films AS f  JOIN films_directors AS fd ON f.filmid = fd.filmid" +
                     " LEFT JOIN  likes l ON f.filmid = l.filmid LEFT JOIN mpa r ON f.mpaid = r.mpaid WHERE directorid=?" +
                     " GROUP BY f.filmid ORDER BY COUNT(usersid) DESC";
@@ -168,7 +168,7 @@ public class FilmDbStorage implements FilmStorage {
 
     public List<Film> getFilmsDirectorSortedByYears(int directorId) {
         //проверили, существует ли такой режжисер
-        if (!directorStorage.getDirector(directorId).isEmpty()) {
+        if (!directorStorage.get(directorId).isEmpty()) {
             String sql = "SELECT f.*,r.mpa AS mpaname FROM films AS f  JOIN films_directors AS fd ON f.filmid = fd.filmid" +
                     " LEFT JOIN mpa r ON f.mpaid = r.mpaid WHERE directorid=? " +
                     "ORDER BY EXTRACT(YEAR FROM CAST(releasedate AS date) )";
