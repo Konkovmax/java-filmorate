@@ -36,7 +36,7 @@ public class ReviewController {
 
     @GetMapping("/reviews/{id}")
     public Review getReview(@PathVariable("id") Integer reviewId) {
-        return reviewService.getReview(reviewId);
+        return reviewService.get(reviewId);
     }
 
     @GetMapping("/reviews")

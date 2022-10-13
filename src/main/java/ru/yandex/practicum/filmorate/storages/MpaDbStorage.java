@@ -21,12 +21,12 @@ public class MpaDbStorage {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    public List<Mpa> findMpa() {
+    public List<Mpa> findAll() {
         String createQuery = "SELECT * FROM mpa";
         return jdbcTemplate.query(createQuery, this::mapRowToMpa);
     }
 
-    public Optional<Mpa> getMpa(int MpaId) {
+    public Optional<Mpa> get(int MpaId) {
         try {
             String createQuery = "SELECT * FROM mpa WHERE mpaid = ?";
             return Optional.of(jdbcTemplate.queryForObject(createQuery, this::mapRowToMpa, MpaId));

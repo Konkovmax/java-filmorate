@@ -56,13 +56,13 @@ public class ReviewDbStorage {
         }
     }
 
-    public List<Review> findAllReviews() {
+    public List<Review> findAll() {
         String createQuery = "SELECT * " +
                 "                 FROM reviews";
         return jdbcTemplate.query(createQuery, this::mapRowToReview);
     }
 
-    public Optional<Review> getReview(int reviewId) {
+    public Optional<Review> get(int reviewId) {
         Review review;
         String createQuery = "SELECT * " +
                 " FROM reviews" +

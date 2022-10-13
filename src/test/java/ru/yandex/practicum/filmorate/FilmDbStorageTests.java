@@ -75,19 +75,19 @@ class FilmDbStorageTests {
 
     @Test
     public void testFindGenres() {
-        List<Genre> allGenres = genreStorage.findGenres();
+        List<Genre> allGenres = genreStorage.findAll();
         assertEquals(6, allGenres.size());
     }
 
     @Test
     public void testFindMpa() {
-        List<Mpa> allMpa = mpaStorage.findMpa();
+        List<Mpa> allMpa = mpaStorage.findAll();
         assertEquals(5, allMpa.size());
     }
 
     @Test
     public void testFindGenreById() {
-        Optional<Genre> filmOptional = genreStorage.getGenre(1);
+        Optional<Genre> filmOptional = genreStorage.get(1);
         assertThat(filmOptional)
                 .isPresent()
                 .hasValueSatisfying(film ->
@@ -97,7 +97,7 @@ class FilmDbStorageTests {
 
     @Test
     public void testFindMpaById() {
-        Optional<Mpa> filmOptional = mpaStorage.getMpa(1);
+        Optional<Mpa> filmOptional = mpaStorage.get(1);
         assertThat(filmOptional)
                 .isPresent()
                 .hasValueSatisfying(film ->

@@ -17,13 +17,13 @@ public class MpaService {
         this.mpaDbStorage = mpaStorage;
     }
 
-    public List<Mpa> findMpa() {
-        return mpaDbStorage.findMpa();
+    public List<Mpa> findAll() {
+        return mpaDbStorage.findAll();
     }
 
-    public Mpa getMpa(int mpaId) {
-        if (mpaDbStorage.getMpa(mpaId).isPresent()) {
-            return mpaDbStorage.getMpa(mpaId).get();
+    public Mpa get(int mpaId) {
+        if (mpaDbStorage.get(mpaId).isPresent()) {
+            return mpaDbStorage.get(mpaId).get();
         } else {
 
             throw new NotFoundException(String.format(

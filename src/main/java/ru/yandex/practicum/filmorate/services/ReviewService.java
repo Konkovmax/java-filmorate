@@ -61,7 +61,7 @@ public class ReviewService {
         int reviewId = review.getReviewId();
         var updatedReview = reviewStorage.update(review);
         if (updatedReview.isPresent()) {
-            int userId = reviewStorage.getReview(reviewId).get().getUserId();
+            int userId = reviewStorage.get(reviewId).get().getUserId();
             Event reviewEvent = new Event(userId, "REVIEW", "UPDATE");
             reviewEvent.setEntityId(updatedReview.get()
                     .getReviewId());
@@ -77,9 +77,9 @@ public class ReviewService {
         }
     }
 
-    public Review getReview(int reviewId) {
-        if (reviewStorage.getReview(reviewId).isPresent()) {
-            return reviewStorage.getReview(reviewId).get();
+    public Review get(int reviewId) {
+        if (reviewStorage.get(reviewId).isPresent()) {
+            return reviewStorage.get(reviewId).get();
         } else {
             throw new NotFoundException(String.format(
                     "Review with id: %s not found", reviewId));
@@ -106,7 +106,7 @@ public class ReviewService {
     public List<Review> getAllReviews(int filmId, int count) {
         List<Review> reviews;
         if (filmId == 0) {
-            reviews = reviewStorage.findAllReviews();
+            reviews = reviewStorage.findAll();
         } else {
             reviews = reviewStorage.getFilmReviews(filmId, count);
         }
@@ -115,7 +115,7 @@ public class ReviewService {
     }
 
     public void removeReview(int reviewId) {
-        var reviewToDelete = reviewStorage.getReview(reviewId);
+        var reviewToDelete = reviewStorage.get(reviewId);
         if (reviewToDelete.isEmpty()) {
             throw new NotFoundException(String.format(
                     "Review with id: %s not found", reviewId));
