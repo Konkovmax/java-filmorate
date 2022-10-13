@@ -1,9 +1,9 @@
-package ru.yandex.practicum.filmorate.service;
+package ru.yandex.practicum.filmorate.services;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.storage.RecommendationDBStorage;
+import ru.yandex.practicum.filmorate.models.Film;
+import ru.yandex.practicum.filmorate.storages.RecommendationDBStorage;
 
 import java.util.List;
 

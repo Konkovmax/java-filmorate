@@ -1,11 +1,11 @@
-package ru.yandex.practicum.filmorate.service;
+package ru.yandex.practicum.filmorate.services;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
-import ru.yandex.practicum.filmorate.model.Director;
-import ru.yandex.practicum.filmorate.storage.DirectorDbStorage;
+import ru.yandex.practicum.filmorate.models.Director;
+import ru.yandex.practicum.filmorate.storages.DirectorDbStorage;
 
 import java.util.List;
 

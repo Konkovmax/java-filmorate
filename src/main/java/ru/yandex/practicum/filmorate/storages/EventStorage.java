@@ -1,6 +1,6 @@
-package ru.yandex.practicum.filmorate.storage;
+package ru.yandex.practicum.filmorate.storages;
 
-import ru.yandex.practicum.filmorate.model.Event;
+import ru.yandex.practicum.filmorate.models.Event;
 
 import java.util.List;
 
