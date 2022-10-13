@@ -4,13 +4,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.models.Mpa;
-import ru.yandex.practicum.filmorate.storages.MpaDbStorage;
 
+import ru.yandex.practicum.filmorate.storages.ImpDAO.MpaDbStorage;
+import ru.yandex.practicum.filmorate.storages.MpaStorage;
 import java.util.List;
 
 @Service
 public class MpaService {
-    private final MpaDbStorage mpaDbStorage;
+
+    private final MpaStorage mpaDbStorage;
 
     @Autowired
     public MpaService(MpaDbStorage mpaStorage) {

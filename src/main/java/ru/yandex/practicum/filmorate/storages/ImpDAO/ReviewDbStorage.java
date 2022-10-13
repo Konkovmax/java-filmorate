@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.storages;
+package ru.yandex.practicum.filmorate.storages.ImpDAO;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -7,6 +7,7 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.models.Review;
+import ru.yandex.practicum.filmorate.storages.ReviewStorage;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -16,7 +17,7 @@ import java.util.Optional;
 
 @Slf4j
 @Component
-public class ReviewDbStorage {
+public class ReviewDbStorage implements ReviewStorage {
 
     private final JdbcTemplate jdbcTemplate;
 
@@ -24,6 +25,7 @@ public class ReviewDbStorage {
         this.jdbcTemplate = jdbcTemplate;
     }
 
+    @Override
     public Review create(Review review) {
         String createQuery = "INSERT INTO reviews(content, ispositive, filmid, userid) " +
                 "VALUES (?, ?, ?, ?)";
@@ -42,6 +44,7 @@ public class ReviewDbStorage {
         return review;
     }
 
+    @Override
     public Optional<Review> update(Review review) {
         String createQuery = "UPDATE reviews SET content = ?, ispositive = ?" +
                 " WHERE reviewid = ?";
@@ -56,12 +59,14 @@ public class ReviewDbStorage {
         }
     }
 
+    @Override
     public List<Review> findAll() {
         String createQuery = "SELECT * " +
                 "                 FROM reviews";
         return jdbcTemplate.query(createQuery, this::mapRowToReview);
     }
 
+    @Override
     public Optional<Review> getById(int reviewId) {
         Review review;
         String createQuery = "SELECT * " +
@@ -77,6 +82,7 @@ public class ReviewDbStorage {
         }
     }
 
+    @Override
     public List<Review> getFilmReviews(int filmId, int count) {
         String createQuery = "SELECT * " +
                 "FROM reviews " +
@@ -85,12 +91,14 @@ public class ReviewDbStorage {
         return jdbcTemplate.query(createQuery, this::mapRowToReview, filmId, count);
     }
 
+    @Override
     public void addReviewReaction(int reviewId, int userId, boolean isLike) {
         String createQuery = "INSERT INTO review_scores(reviewid, userid, islike) " +
                 "VALUES (?, ?, ?)";
         jdbcTemplate.update(createQuery, reviewId, userId, isLike);
     }
 
+    @Override
     public void removeReviewReaction(int reviewId, int userId, boolean isLike) {
         String createQuery = "DELETE FROM review_scores WHERE reviewid = ? AND userid = ? " +
                 "AND islike = ?";
@@ -118,7 +126,8 @@ public class ReviewDbStorage {
         return useful;
     }
 
-    public void removeReview(int reviewId) {
+    @Override
+    public void delete(int reviewId) {
         String createQuery = "DELETE FROM reviews WHERE reviewid = ? ";
         jdbcTemplate.update(createQuery, reviewId);
         log.info("Like removed");

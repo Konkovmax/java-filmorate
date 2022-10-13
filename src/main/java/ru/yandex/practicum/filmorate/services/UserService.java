@@ -7,26 +7,26 @@ import ru.yandex.practicum.filmorate.exceptions.BadRequestException;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.models.Event;
 import ru.yandex.practicum.filmorate.models.User;
-import ru.yandex.practicum.filmorate.storages.EventDbStorage;
-import ru.yandex.practicum.filmorate.storages.UserDbStorage;
+import ru.yandex.practicum.filmorate.storages.EventStorage;
+import ru.yandex.practicum.filmorate.storages.ImpDAO.EventDbStorage;
+import ru.yandex.practicum.filmorate.storages.ImpDAO.UserDbStorage;
+import ru.yandex.practicum.filmorate.storages.UserStorage;
 
 import java.time.LocalDate;
 import java.util.List;
 
 @Slf4j
 @Service
-public class UserService {
-    private final UserDbStorage userStorage;
-    private final EventDbStorage eventStorage;
+
+public class UserService extends BasicService<User> {
+    private final UserStorage userStorage;
+    private final EventStorage eventStorage;
 
     @Autowired
     public UserService(UserDbStorage userStorage, EventDbStorage eventStorage) {
+        super(userStorage,User.class);
         this.userStorage = userStorage;
         this.eventStorage = eventStorage;
-    }
-
-    public List<User> findAll() {
-        return userStorage.findAll();
     }
 
     public User create(User user) {
@@ -38,37 +38,12 @@ public class UserService {
                 log.warn("Name is empty. Login is used as a name.");
             }
             log.info("User added");
-            User addedUser = userStorage.create(user);
-            addedUser.setId(userStorage.getUserIdFromDb(user.getLogin()));
-            return addedUser;
+            return super.create(user);
         } else {
             return user;
         }
     }
 
-    public User update(User user) {
-        if (userStorage.update(user).isPresent()) {
-            return userStorage.update(user).get();
-        } else {
-            throw new NotFoundException(String.format(
-                    "User with id: %s not found",
-                    user.getId()));
-        }
-    }
-
-    public User getUser(int userId) {
-        if (userStorage.getById(userId).isPresent()) {
-            return userStorage.getById(userId).get();
-        } else {
-            throw new NotFoundException(String.format(
-                    "User with id: %s not found", userId));
-        }
-    }
-
-    public void delete(int userId) {
-        userStorage.delete(userId);
-
-    }
 
     public void addFriend(int userId, int friendId) {
 
@@ -86,7 +61,7 @@ public class UserService {
             userStorage.addFriend(userId, friendId);
             Event friendEvent = new Event(userId, "FRIEND", "ADD");
             friendEvent.setEntityId(friendId);
-            eventStorage.add(friendEvent);
+            eventStorage.create(friendEvent);
         }
     }
 
@@ -99,7 +74,7 @@ public class UserService {
             userStorage.removeFriend(userId, friendId);
             Event friendEvent = new Event(userId, "FRIEND", "REMOVE");
             friendEvent.setEntityId(friendId);
-            eventStorage.add(friendEvent);
+            eventStorage.create(friendEvent);
         }
     }
 

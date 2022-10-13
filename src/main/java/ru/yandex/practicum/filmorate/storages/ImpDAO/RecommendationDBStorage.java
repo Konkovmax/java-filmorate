@@ -1,10 +1,11 @@
-package ru.yandex.practicum.filmorate.storages;
+package ru.yandex.practicum.filmorate.storages.ImpDAO;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.models.Film;
+import ru.yandex.practicum.filmorate.storages.RecommendationStorage;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,12 +14,12 @@ import java.util.Optional;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class RecommendationDBStorage {
+public class RecommendationDBStorage implements RecommendationStorage {
 
     private final JdbcTemplate jdbcTemplate;
     private final FilmDbStorage filmStorage;
 
-    public List<Film> recommendations(int userId) {
+    public List<Film> getAll(int userId) {
         List<Film> recommendations = new ArrayList<>();
         String createQuery = "SELECT filmid FROM likes WHERE usersid = ? ";
         List<Integer> filmsForUserId = jdbcTemplate.queryForList(createQuery, Integer.class, userId);

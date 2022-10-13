@@ -1,9 +1,8 @@
-package ru.yandex.practicum.filmorate.storages;
+package ru.yandex.practicum.filmorate.storages.ImpDAO;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
@@ -11,6 +10,7 @@ import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.models.Film;
 import ru.yandex.practicum.filmorate.models.Genre;
+import ru.yandex.practicum.filmorate.storages.FilmStorage;
 
 import java.sql.Date;
 import java.sql.PreparedStatement;
@@ -36,6 +36,7 @@ public class FilmDbStorage implements FilmStorage {
         this.directorStorage = directorStorage;
     }
 
+    @Override
     public Film create(Film film) {
         String sqlQuery = "INSERT INTO films(name, description, duration, releasedate, mpaid) " +
                 "VALUES (?, ?, ?, ?, ?)";
@@ -64,6 +65,7 @@ public class FilmDbStorage implements FilmStorage {
         return film;
     }
 
+    @Override
     public Optional<Film> update(Film film) {
         String createQuery = "UPDATE films SET name = ?, description = ?, duration = ?, releasedate = ?, mpaid =? WHERE filmid = ?";
         int updateSuccess = jdbcTemplate.update(createQuery,
@@ -93,7 +95,7 @@ public class FilmDbStorage implements FilmStorage {
             return Optional.ofNullable(null);
         }
     }
-
+    @Override
     public List<Film> findAll() {
         String createQuery = "SELECT f.*, r.mpa AS mpaname" +
                 "                 FROM films f" +
@@ -101,6 +103,7 @@ public class FilmDbStorage implements FilmStorage {
         return jdbcTemplate.query(createQuery, this::mapRowToFilm);
     }
 
+    @Override
     public Optional<Film> getById(int filmId) {
         String createQuery = "SELECT f.*, r.mpa AS mpaname " +
                 "FROM films f " +
@@ -111,25 +114,25 @@ public class FilmDbStorage implements FilmStorage {
         }
         return Optional.of(films.get(0));
     }
-
-    public boolean delete(int filmId) {
+    @Override
+    public void delete(int filmId) {
         String createQuery = "DELETE FROM films WHERE filmid = ?";
         var filmToDelete = this.getById(filmId);
         if (filmToDelete.isPresent()) {
             jdbcTemplate.update(createQuery, filmId);
-            return true;
         } else {
             log.warn("user not found");
-            return false;
+            throw new NotFoundException("Фильм с id " + filmId + " не найден");
         }
     }
-
+    @Override
     public void addLike(int filmId, int userId) {
         String createQuery = "INSERT INTO likes(filmid, usersid) " +
                 "VALUES (?, ?)";
         jdbcTemplate.update(createQuery, filmId, userId);
     }
 
+    @Override
     public void removeLike(int filmId, int userId) {
 
         String createQuery = "DELETE FROM likes WHERE usersid = ? AND filmid = ?";
@@ -151,6 +154,7 @@ public class FilmDbStorage implements FilmStorage {
         return film;
     }
 
+    @Override
     public List<Film> getFilmsDirectorSortedByLike(int directorId) {
         //проверили, существует ли такой режжисер
         if (!directorStorage.getById(directorId).isEmpty()) {
@@ -166,6 +170,7 @@ public class FilmDbStorage implements FilmStorage {
         }
     }
 
+    @Override
     public List<Film> getFilmsDirectorSortedByYears(int directorId) {
         //проверили, существует ли такой режжисер
         if (!directorStorage.getById(directorId).isEmpty()) {
@@ -179,18 +184,7 @@ public class FilmDbStorage implements FilmStorage {
                     directorId));
         }
     }
-
-    private int getFilmIdFromDb(String name) {
-        String createQuery = "SELECT f.*, r.mpa AS mpaname" +
-                " FROM films f" +
-                " JOIN mpa r ON r.mpaid = f.mpaid WHERE f.name = ?";
-        try {
-            return jdbcTemplate.queryForObject(createQuery, this::mapRowToFilm, name).getId();
-        } catch (EmptyResultDataAccessException e) {
-            return 0;
-        }
-    }
-
+    @Override
     public List<Film> search(String query, List<String> searchParam) {
         List<Film> searchResultList = new ArrayList<>();
         query = "%" + query.toLowerCase() + "%";
@@ -206,6 +200,7 @@ public class FilmDbStorage implements FilmStorage {
         }
         return searchResultList;
     }
+
 
     private List<Film> searchByTitle(String query) {
         String sqlQuery = "(SELECT f.*, r.mpa AS mpaname" +
@@ -224,7 +219,7 @@ public class FilmDbStorage implements FilmStorage {
                 "                 WHERE LOWER(d.name) LIKE ?)";
         return jdbcTemplate.query(sqlQuery, this::mapRowToFilm, query);
     }
-
+    @Override
     public List<Film> getCommonFilms(long userId, long friendId) {
         String sqlQuery = "SELECT f.*, r.mpa AS mpaname" +
                 "                 FROM films f" +
@@ -250,9 +245,8 @@ public class FilmDbStorage implements FilmStorage {
                 "ORDER BY COUNT(l.usersid) DESC " +
                 "LIMIT ?";
 
-        List<Film> film = jdbcTemplate.query(createQuery, this::mapRowToFilm, year, genreId, count);
         log.info("Popular Film By Genre And Year has found");
-        return film;
+        return jdbcTemplate.query(createQuery, this::mapRowToFilm, year, genreId, count);
     }
 
     @Override
@@ -268,9 +262,8 @@ public class FilmDbStorage implements FilmStorage {
                 "ORDER BY COUNT(l.usersid) DESC " +
                 "LIMIT ?";
 
-        List<Film> film = jdbcTemplate.query(createQuery, this::mapRowToFilm, genreId, count);
         log.info("Popular Film By Genre has found");
-        return film;
+        return jdbcTemplate.query(createQuery, this::mapRowToFilm, genreId, count);
     }
 
     @Override
@@ -286,9 +279,8 @@ public class FilmDbStorage implements FilmStorage {
                 "ORDER BY COUNT(l.usersid) DESC " +
                 "LIMIT ?";
 
-        List<Film> film = jdbcTemplate.query(createQuery, this::mapRowToFilm, year, count);
         log.info("Popular Film By Year has found");
-        return film;
+        return jdbcTemplate.query(createQuery, this::mapRowToFilm, year, count);
     }
 
     @Override

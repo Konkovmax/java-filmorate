@@ -9,9 +9,9 @@ import org.springframework.test.context.jdbc.Sql;
 import ru.yandex.practicum.filmorate.models.Film;
 import ru.yandex.practicum.filmorate.models.Genre;
 import ru.yandex.practicum.filmorate.models.Mpa;
-import ru.yandex.practicum.filmorate.storages.FilmDbStorage;
-import ru.yandex.practicum.filmorate.storages.GenreDbStorage;
-import ru.yandex.practicum.filmorate.storages.MpaDbStorage;
+import ru.yandex.practicum.filmorate.storages.ImpDAO.FilmDbStorage;
+import ru.yandex.practicum.filmorate.storages.ImpDAO.GenreDbStorage;
+import ru.yandex.practicum.filmorate.storages.ImpDAO.MpaDbStorage;
 
 import java.util.List;
 import java.util.Optional;

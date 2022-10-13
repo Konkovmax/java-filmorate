@@ -7,9 +7,13 @@ import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.models.Event;
 import ru.yandex.practicum.filmorate.models.Film;
 import ru.yandex.practicum.filmorate.models.Genre;
-import ru.yandex.practicum.filmorate.storages.EventDbStorage;
-import ru.yandex.practicum.filmorate.storages.FilmDbStorage;
-import ru.yandex.practicum.filmorate.storages.UserDbStorage;
+
+import ru.yandex.practicum.filmorate.storages.EventStorage;
+import ru.yandex.practicum.filmorate.storages.FilmStorage;
+import ru.yandex.practicum.filmorate.storages.ImpDAO.EventDbStorage;
+import ru.yandex.practicum.filmorate.storages.ImpDAO.FilmDbStorage;
+import ru.yandex.practicum.filmorate.storages.ImpDAO.UserDbStorage;
+import ru.yandex.practicum.filmorate.storages.UserStorage;
 
 import java.util.Arrays;
 import java.util.List;
@@ -17,23 +21,21 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Service
-public class FilmService {
-    private final FilmDbStorage filmStorage;
-    private final UserDbStorage userStorage;
-    private final EventDbStorage eventStorage;
 
+public class FilmService extends BasicService<Film> {
+    private final FilmStorage filmStorage;
+    private final UserStorage userStorage;
+    private final EventStorage eventStorage;
 
     @Autowired
     public FilmService(FilmDbStorage filmStorage, UserDbStorage userStorage, EventDbStorage eventStorage) {
+        super(filmStorage, Film.class);
         this.filmStorage = filmStorage;
         this.userStorage = userStorage;
         this.eventStorage = eventStorage;
     }
 
-    public Film create(Film film) {
-        return filmStorage.create(film);
-    }
-
+    @Override
     public Film update(Film film) {
         List<Genre> genres = film.getGenres();
         if (genres != null && genres.size() > 0) {
@@ -41,43 +43,14 @@ public class FilmService {
                     .distinct()
                     .collect(Collectors.toList()));
         }
-        if (filmStorage.update(film).isPresent()) {
-            log.info("Film updated");
-            return filmStorage.update(film).get();
-        } else {
-            log.warn("Film not found");
-            throw new NotFoundException(String.format(
-                    "Film with id: %s not found",
-                    film.getId()));
-        }
-    }
-
-    public void delete(int filmId) {
-        var deletedFilm = filmStorage.delete(filmId);
-        if (!deletedFilm) {
-            throw new NotFoundException(String.format(
-                    "Film with id: %s not found", filmId));
-        }
-    }
-
-    public List<Film> findAll() {
-        return filmStorage.findAll();
-    }
-
-    public Film getById(int filmId) {
-        if (filmStorage.getById(filmId).isPresent()) {
-            return filmStorage.getById(filmId).get();
-        } else {
-            throw new NotFoundException(String.format(
-                    "Film with id: %s not found", filmId));
-        }
+        return super.update(film);
     }
 
     public void addLike(int filmId, int userId) {
         filmStorage.addLike(filmId, userId);
         Event likeEvent = new Event(userId, "LIKE", "ADD");
         likeEvent.setEntityId(filmId);
-        eventStorage.add(likeEvent);
+        eventStorage.create(likeEvent);
     }
 
     public void removeLike(int filmId, int userId) {
@@ -90,7 +63,7 @@ public class FilmService {
             filmStorage.removeLike(filmId, userId);
             Event likeEvent = new Event(userId, "LIKE", "REMOVE");
             likeEvent.setEntityId(filmId);
-            eventStorage.add(likeEvent);
+            eventStorage.create(likeEvent);
         }
     }
 
@@ -108,7 +81,6 @@ public class FilmService {
             return filmStorage.getPopularByGenreAndYear(year, genreId, count);
         }
     }
-
 
     public List<Film> getCommonFilms(Long userId, Long friendId) {
         return getSortedFilms(filmStorage.getCommonFilms(userId, friendId));
@@ -136,6 +108,5 @@ public class FilmService {
         String[] items = params.split(",");
         List<String> searchParam = Arrays.asList(items);
         return getSortedFilms(filmStorage.search(query, searchParam));
-
     }
 }

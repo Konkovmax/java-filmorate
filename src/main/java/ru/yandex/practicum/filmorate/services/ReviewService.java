@@ -7,10 +7,12 @@ import ru.yandex.practicum.filmorate.exceptions.BadRequestException;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.models.Event;
 import ru.yandex.practicum.filmorate.models.Review;
-import ru.yandex.practicum.filmorate.storages.EventDbStorage;
-import ru.yandex.practicum.filmorate.storages.FilmDbStorage;
-import ru.yandex.practicum.filmorate.storages.ReviewDbStorage;
-import ru.yandex.practicum.filmorate.storages.UserDbStorage;
+
+import ru.yandex.practicum.filmorate.storages.EventStorage;
+import ru.yandex.practicum.filmorate.storages.FilmStorage;
+import ru.yandex.practicum.filmorate.storages.ReviewStorage;
+import ru.yandex.practicum.filmorate.storages.UserStorage;
+
 
 import java.util.Collections;
 import java.util.Comparator;
@@ -20,10 +22,11 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class ReviewService {
-    private final ReviewDbStorage reviewStorage;
-    private final UserDbStorage userStorage;
-    private final FilmDbStorage filmStorage;
-    private final EventDbStorage eventStorage;
+    private final ReviewStorage reviewStorage;
+    private final UserStorage userStorage;
+    private final FilmStorage filmStorage;
+    private final EventStorage eventStorage;
+
 
     public Review create(Review review) {
         if (review.getUserId() == 0) {
@@ -52,7 +55,7 @@ public class ReviewService {
             Review createdReview = reviewStorage.create(review);
             Event reviewEvent = new Event(createdReview.getUserId(), "REVIEW", "ADD");
             reviewEvent.setEntityId(createdReview.getReviewId());
-            eventStorage.add(reviewEvent);
+            eventStorage.create(reviewEvent);
             return createdReview;
         }
     }
@@ -65,7 +68,7 @@ public class ReviewService {
             Event reviewEvent = new Event(userId, "REVIEW", "UPDATE");
             reviewEvent.setEntityId(updatedReview.get()
                     .getReviewId());
-            eventStorage.add(reviewEvent);
+            eventStorage.create(reviewEvent);
 
             log.info("Review updated");
             return updatedReview.get();
@@ -77,7 +80,7 @@ public class ReviewService {
         }
     }
 
-    public Review get(int reviewId) {
+    public Review getById(int reviewId) {
         if (reviewStorage.getById(reviewId).isPresent()) {
             return reviewStorage.getById(reviewId).get();
         } else {
@@ -103,7 +106,7 @@ public class ReviewService {
 
     private final Comparator<Review> comparator = Comparator.comparingInt(Review::getUseful).reversed();
 
-    public List<Review> getAllReviews(int filmId, int count) {
+    public List<Review> getAll(int filmId, int count) {
         List<Review> reviews;
         if (filmId == 0) {
             reviews = reviewStorage.findAll();
@@ -114,7 +117,7 @@ public class ReviewService {
         return reviews;
     }
 
-    public void removeReview(int reviewId) {
+    public void delete(int reviewId) {
         var reviewToDelete = reviewStorage.getById(reviewId);
         if (reviewToDelete.isEmpty()) {
             throw new NotFoundException(String.format(
@@ -123,9 +126,8 @@ public class ReviewService {
             Event reviewEvent = new Event(reviewToDelete.get().getUserId(), "REVIEW",
                     "REMOVE");
             reviewEvent.setEntityId(reviewId);
-            eventStorage.add(reviewEvent);
-
-            reviewStorage.removeReview(reviewId);
+            eventStorage.create(reviewEvent);
+            reviewStorage.delete(reviewId);
         }
     }
 }
