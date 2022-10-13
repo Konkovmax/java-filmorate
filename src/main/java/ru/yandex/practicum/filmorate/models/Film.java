@@ -43,8 +43,6 @@ public class Film {
 
     private List<Director> directors;
 
-    private Director director;
-
     public Film(int id, String name, String description, String releaseDate, int duration, int ratingId, String ratingName) {
         this.id = id;
         this.name = name;
