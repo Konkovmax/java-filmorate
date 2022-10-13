@@ -104,8 +104,6 @@ public class ReviewService {
         }
     }
 
-    private final Comparator<Review> comparator = Comparator.comparingInt(Review::getUseful).reversed();
-
     public List<Review> getAll(int filmId, int count) {
         List<Review> reviews;
         if (filmId == 0) {
@@ -130,4 +128,6 @@ public class ReviewService {
             reviewStorage.delete(reviewId);
         }
     }
+
+    private final Comparator<Review> comparator = Comparator.comparingInt(Review::getUseful).reversed();
 }
