@@ -1,6 +1,4 @@
-.gitignore
-application.properties
-application.yml
+
 *.class
 *.log
 *.jar
